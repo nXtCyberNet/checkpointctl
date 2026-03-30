@@ -68,6 +68,34 @@ During the `Sealing` phase, the underlying engine does not just zip files. It ge
 - **Checkpointed Assets:** Uses `Prefetch()` to identify exact running Process IDs (PIDs) and Image Digests. This ensures the footprint of the container has not morphed between trigger and execution.
 - **Collector Endpoint Integration:** Bundles are sent natively via HTTP to the internal Collector Service. If network boundaries fail or token paths mismatched (as noted in historical troubleshooting), the operator enters an error state populated in `Status.FailureReason`.
 
+### What The Current Bundle Actually Contains (Code-Accurate)
+Based on the current implementation in `internal/bundle/builder.go`, the final `forensic-<snapshot>.bundle.tar.gz` contains these files:
+
+- `metadata.json`
+  - This is `req.Metadata` serialized with `json.MarshalIndent(...)`.
+  - In practice this is the forensic metadata produced by the capture path (`fetchForensicMetadata` result), not a generic placeholder.
+
+- `ForensicSnapshot.yaml`
+  - This is a generated snapshot descriptor string (not a full live CR export).
+  - It currently includes:
+    - `apiVersion: forensics.cybernet.dev/v1alpha1`
+    - `kind: ForensicSnapshot`
+    - `metadata.name`, `metadata.namespace`
+    - `spec.podName`, `spec.nodeName`
+  - It does not currently include full status, conditions, timings, or every spec field.
+
+- `manifest.json`
+  - Map of archive-path to SHA256 hash.
+  - Includes SHA256 for `metadata.json` and `ForensicSnapshot.yaml`.
+  - For checkpoint entries under `checkpoints/*`:
+    - If source file is readable at bundle time, manifest stores its SHA256.
+    - If source file is missing/inaccessible, manifest stores `"UNAVAILABLE"`.
+
+### Additional Bundle Notes
+- Checkpoint payload files are added as `checkpoints/<index>-<basename>` based on collector response `bundlePath` values.
+- If a checkpoint file cannot be read while assembling, bundling continues and writes `<entry>.missing.txt` containing the error message.
+- This resilience prevents empty placeholder bundles and gives investigators explicit evidence when a payload path was unavailable.
+
 ---
 
 ## 5. Deployment & System Requirements 
