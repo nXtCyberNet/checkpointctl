@@ -45,6 +45,22 @@ type: Opaque
 stringData:
   token: "dev-token"   # keep simple for local KIND, don't act like you're deploying to NASA
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkpoint-collector
+  namespace: forensics-system
+  labels:
+    app: checkpoint-collector
+spec:
+  selector:
+    app: checkpoint-collector
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:

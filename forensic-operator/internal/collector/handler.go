@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -67,25 +68,27 @@ func (h *Handler) HandleTrigger(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 1. Copy the checkpoint .tar to a safe temp location
-	tempPath := filepath.Join(os.TempDir(), filepath.Base(req.CheckpointPath))
+	// 1. Build final bundle path first so temp staging can happen on the same filesystem.
+	bundlePath := filepath.Join(h.storagePath, req.BundleKey, "bundle.tar.gz")
+	if err := os.MkdirAll(filepath.Dir(bundlePath), 0755); err != nil {
+		http.Error(w, "mkdir failed", http.StatusInternalServerError)
+		return
+	}
+
+	// Stage temp artifact in destination directory to avoid cross-device rename errors.
+	tempPath := filepath.Join(filepath.Dir(bundlePath), fmt.Sprintf(".%s.tmp", filepath.Base(req.CheckpointPath)))
+
+	// 2. Copy the checkpoint .tar to a safe temp location
 	if err := copyFile(req.CheckpointPath, tempPath); err != nil {
 		logger.Error(err, "Failed to copy checkpoint file")
 		http.Error(w, "copy failed", http.StatusInternalServerError)
 		return
 	}
 
-	// 2. Compute SHA256 before any transmission
+	// 3. Compute SHA256 before any transmission
 	sha256sum, err := computeSHA256(tempPath)
 	if err != nil {
 		http.Error(w, "hash failed", http.StatusInternalServerError)
-		return
-	}
-
-	// 3. Build final bundle path
-	bundlePath := filepath.Join(h.storagePath, req.BundleKey, "bundle.tar.gz")
-	if err := os.MkdirAll(filepath.Dir(bundlePath), 0755); err != nil {
-		http.Error(w, "mkdir failed", http.StatusInternalServerError)
 		return
 	}
 
@@ -93,12 +96,20 @@ func (h *Handler) HandleTrigger(w http.ResponseWriter, r *http.Request) {
 	// (In full version we would create the full .bundle.tar.gz here)
 	finalCheckpointPath := filepath.Join(filepath.Dir(bundlePath), filepath.Base(req.CheckpointPath))
 	if err := os.Rename(tempPath, finalCheckpointPath); err != nil {
-		http.Error(w, "move failed", http.StatusInternalServerError)
-		return
+		// Fallback for environments where rename may still fail unexpectedly.
+		if copyErr := copyFile(tempPath, finalCheckpointPath); copyErr != nil {
+			logger.Error(err, "Rename failed")
+			logger.Error(copyErr, "Fallback copy after rename failure also failed")
+			http.Error(w, "move failed", http.StatusInternalServerError)
+			return
+		}
+		_ = os.Remove(tempPath)
 	}
 
 	// 4. Cleanup original checkpoint file (critical for node disk safety)
-	os.Remove(req.CheckpointPath)
+	if err := os.Remove(req.CheckpointPath); err != nil {
+		logger.Error(err, "Failed to remove original checkpoint file", "path", req.CheckpointPath)
+	}
 
 	logger.Info("Collector successfully processed checkpoint",
 		"originalPath", req.CheckpointPath,

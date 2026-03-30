@@ -30,7 +30,7 @@ const (
 // +kubebuilder:rbac:groups=forensics.cybernet.dev,resources=forensicsnapshots,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=forensics.cybernet.dev,resources=forensicsnapshots/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=forensics.cybernet.dev,resources=forensicsnapshots/finalizers,verbs=update
-// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;update;patch
 // +kubebuilder:rbac:groups=core,resources=nodes/proxy,verbs=create
 // +kubebuilder:rbac:groups=core,resources=events,verbs=list
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list

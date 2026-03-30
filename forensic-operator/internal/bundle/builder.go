@@ -83,6 +83,10 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 func (b *Builder) callCollector(ctx context.Context, req BuildRequest) (map[string]string, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("Starting collector calls", "checkpointCount", len(req.CheckpointPaths), "collectorURL", req.CollectorURL)
+	authToken := os.Getenv("FORENSICS_AUTH_TOKEN")
+	if authToken == "" {
+		return nil, fmt.Errorf("FORENSICS_AUTH_TOKEN is not set for controller")
+	}
 
 	client := &http.Client{Timeout: 60 * time.Second}
 
@@ -97,7 +101,7 @@ func (b *Builder) callCollector(ctx context.Context, req BuildRequest) (map[stri
 
 		body, _ := json.Marshal(payload)
 		httpReq, _ := http.NewRequestWithContext(ctx, "POST", req.CollectorURL+"/trigger", bytes.NewReader(body))
-		httpReq.Header.Set("Authorization", "Bearer super-secret-token-change-me-in-production")
+		httpReq.Header.Set("Authorization", "Bearer "+authToken)
 		httpReq.Header.Set("Content-Type", "application/json")
 
 		resp, err := client.Do(httpReq)

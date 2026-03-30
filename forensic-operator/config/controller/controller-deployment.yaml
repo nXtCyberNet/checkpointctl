@@ -18,7 +18,7 @@ rules:
   # Core permissions for capture engine
   - apiGroups: [""]
     resources: ["pods"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["get", "list", "watch", "update", "patch"]
   - apiGroups: [""]
     resources: ["events"]
     verbs: ["list"]
@@ -42,7 +42,7 @@ rules:
   # Optional: allow watching pods for annotation trigger
   - apiGroups: [""]
     resources: ["pods"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["get", "list", "watch", "update", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -91,6 +91,11 @@ spec:
         env:
           - name: FORENSICS_COLLECTOR_URL
             value: "http://checkpoint-collector.forensics-system.svc:8080"
+          - name: FORENSICS_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: collector-auth
+                key: token
 
         ports:
           - containerPort: 8080
