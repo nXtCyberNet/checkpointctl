@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- forensics_v1alpha1_forensicsnapshot.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

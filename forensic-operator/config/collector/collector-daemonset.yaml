@@ -1,0 +1,145 @@
+# config/collector/collector-daemonset.yaml
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: forensics-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: checkpoint-collector
+  namespace: forensics-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: checkpoint-collector
+rules:
+  - apiGroups: [""]
+    resources: ["nodes/proxy"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: checkpoint-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: checkpoint-collector
+subjects:
+  - kind: ServiceAccount
+    name: checkpoint-collector
+    namespace: forensics-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: collector-auth
+  namespace: forensics-system
+type: Opaque
+stringData:
+  token: "dev-token"   # keep simple for local KIND, don't act like you're deploying to NASA
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: checkpoint-collector
+  namespace: forensics-system
+  labels:
+    app: checkpoint-collector
+spec:
+  selector:
+    matchLabels:
+      app: checkpoint-collector
+
+  template:
+    metadata:
+      labels:
+        app: checkpoint-collector
+
+    spec:
+      serviceAccountName: checkpoint-collector
+
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+
+      containers:
+        - name: collector
+          image: forensic-collector:latest   # IMPORTANT: match your built image name
+          imagePullPolicy: IfNotPresent
+
+          command: ["/collector"]
+          args:
+            - --storage-path=/var/lib/forensics
+            - --port=8080
+
+          env:
+            - name: FORENSICS_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: collector-auth
+                  key: token
+
+          ports:
+            - containerPort: 8080
+              name: http
+              hostPort: 8080   # works fine in KIND (single node usually)
+
+          volumeMounts:
+            - name: checkpoints
+              mountPath: /var/lib/kubelet/checkpoints
+              readOnly: true
+
+            - name: forensics-storage
+              mountPath: /var/lib/forensics
+
+            - name: tmp
+              mountPath: /tmp
+
+          securityContext:
+            privileged: true
+            runAsUser: 0
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+
+      tolerations:
+        - operator: Exists
+
+      volumes:
+        - name: checkpoints
+          hostPath:
+            path: /var/lib/kubelet/checkpoints
+            type: DirectoryOrCreate
+
+        - name: forensics-storage
+          hostPath:
+            path: /var/lib/forensics
+            type: DirectoryOrCreate
+
+        - name: tmp
+          emptyDir: {}

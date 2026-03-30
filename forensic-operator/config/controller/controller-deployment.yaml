@@ -1,0 +1,125 @@
+# config/controller/controller-deployment.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: forensics-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: forensic-controller
+  namespace: forensics-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: forensic-controller
+rules:
+  # Core permissions for capture engine
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list"]
+
+  # Required to call Kubelet Checkpoint API through apiserver proxy
+  - apiGroups: [""]
+    resources: ["nodes/proxy"]
+    verbs: ["create", "get"]
+
+  # Full access to our own CRD
+  - apiGroups: ["forensics.cybernet.dev"]
+    resources: ["forensicsnapshots"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["forensics.cybernet.dev"]
+    resources: ["forensicsnapshots/status", "forensicsnapshots/finalizers"]
+    verbs: ["get", "update", "patch"]
+
+  # Optional: allow watching pods for annotation trigger
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: forensic-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: forensic-controller
+subjects:
+  - kind: ServiceAccount
+    name: forensic-controller
+    namespace: forensics-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forensic-controller
+  namespace: forensics-system
+  labels:
+    app: forensic-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: forensic-controller
+  template:
+    metadata:
+      labels:
+        app: forensic-controller
+    spec:
+      serviceAccountName: forensic-controller
+
+      containers:
+      - name: controller
+        image: forensic-controller:latest          # ← Change to your built image name
+        imagePullPolicy: IfNotPresent
+
+        command: ["/controller"]
+        args:
+          - --collector-url=http://checkpoint-collector.forensics-system.svc:8080
+          - --metrics-bind-address=:8080
+          - --health-probe-bind-address=:8081
+          - --leader-elect=false          # set true in production
+
+        env:
+          - name: FORENSICS_COLLECTOR_URL
+            value: "http://checkpoint-collector.forensics-system.svc:8080"
+
+        ports:
+          - containerPort: 8080
+            name: metrics
+          - containerPort: 8081
+            name: health
+
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 10
+          periodSeconds: 10
+
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+      # Tolerations if you want to run on all nodes
+      tolerations:
+        - operator: Exists

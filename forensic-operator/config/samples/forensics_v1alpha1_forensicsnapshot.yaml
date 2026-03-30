@@ -1,0 +1,9 @@
+apiVersion: forensics.cybernet.dev/v1alpha1
+kind: ForensicSnapshot
+metadata:
+  labels:
+    app.kubernetes.io/name: forensic-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: forensicsnapshot-sample
+spec:
+  # TODO(user): Add fields here
