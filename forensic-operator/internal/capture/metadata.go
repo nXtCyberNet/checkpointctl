@@ -13,7 +13,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// prefetchPodInfo does the single lightweight GET to solve the "chicken-and-egg" problem
 // This is the ONLY sequential call before the two parallel goroutines.
 func (e *Engine) prefetchPodInfo(ctx context.Context, namespace, podName string) (*PodInfo, error) {
 	logger := log.FromContext(ctx)
@@ -42,7 +41,6 @@ func (e *Engine) prefetchPodInfo(ctx context.Context, namespace, podName string)
 	}, nil
 }
 
-// fetchForensicMetadata gathers rich context around the checkpoint (the "story" behind the memory dump)
 func (e *Engine) fetchForensicMetadata(ctx context.Context, podInfo *PodInfo) (*ForensicMetadata, error) {
 	logger := log.FromContext(ctx)
 	start := time.Now()
@@ -81,7 +79,7 @@ func (e *Engine) fetchForensicMetadata(ctx context.Context, podInfo *PodInfo) (*
 		}
 	}
 
-	// Extract environment variables from all containers (very useful for forensics)
+	// Extract environment variables from all containers
 	for _, c := range pod.Spec.Containers {
 		for _, env := range c.Env {
 			if env.Value != "" {
@@ -92,7 +90,7 @@ func (e *Engine) fetchForensicMetadata(ctx context.Context, podInfo *PodInfo) (*
 		}
 	}
 
-	// Fetch last 20 events for this pod (timeline)
+	// Fetch last 20 events for this pod (timeline) not completed till now
 	events, err := e.client.CoreV1().Events(pod.Namespace).List(ctx, metav1.ListOptions{
 		FieldSelector: fmt.Sprintf("involvedObject.name=%s", pod.Name),
 		Limit:         20,

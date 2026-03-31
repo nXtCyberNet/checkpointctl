@@ -23,7 +23,6 @@ func Select(pod *corev1.Pod, requestedContainers []string) []string {
 	logger := log.FromContext(context.Background())
 
 	if len(requestedContainers) > 0 {
-		// Tier 1: Explicit list (from annotation, webhook, or ForensicSnapshot spec)
 		logger.Info("Using Tier 1 - explicit container list", "containers", requestedContainers)
 		return requestedContainers
 	}
@@ -46,7 +45,6 @@ func allNonInitContainers(pod *corev1.Pod) []string {
 		names = append(names, c.Name)
 	}
 
-	// Init containers are intentionally excluded (they already ran and exited)
 	return names
 }
 
@@ -75,11 +73,10 @@ func ToCheckpointed(selected []string, pod *corev1.Pod) []forensicsv1alpha1.Cont
 	var result []forensicsv1alpha1.ContainerCheckpointed
 
 	for _, name := range selected {
-		// Find image digest if available
 		var digest string
 		for _, status := range pod.Status.ContainerStatuses {
 			if status.Name == name && status.ImageID != "" {
-				digest = status.ImageID // usually "docker-pullable://...@sha256:..."
+				digest = status.ImageID
 				break
 			}
 		}

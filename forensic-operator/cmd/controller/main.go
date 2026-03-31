@@ -68,7 +68,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Create shared components
 	kubeClientset, err := kubernetes.NewForConfig(mgr.GetConfig())
 	if err != nil {
 		setupLog.Error(err, "unable to create kubernetes clientset")
@@ -87,7 +86,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Setup Pod Annotation Watcher (this makes `kubectl annotate` work automatically)
+	// Setup Pod Annotation Watcher (for prototype only )
 	if err = (&controller.PodWatcher{
 		Client: mgr.GetClient(),
 	}).SetupWithManager(mgr); err != nil {

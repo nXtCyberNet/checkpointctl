@@ -18,12 +18,10 @@ import (
 	forensicsv1alpha1 "github.com/nxtcybernet/checkpointctl/api/v1alpha1"
 )
 
-// PodWatcher watches for the special annotation and creates ForensicSnapshot CRs
 type PodWatcher struct {
 	client.Client
 }
 
-// SetupWithManager registers the pod watcher
 func (w *PodWatcher) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1.Pod{}).
@@ -52,7 +50,6 @@ func (w *PodWatcher) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
-	// Extract requested containers (comma-separated)
 	var requestedContainers []string
 	if containersStr, ok := pod.Annotations[containersAnnotation]; ok && containersStr != "" {
 		for _, c := range strings.Split(containersStr, ",") {
@@ -85,7 +82,6 @@ func (w *PodWatcher) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		},
 	}
 
-	// Create the snapshot
 	if err := w.Create(ctx, snapshot); err != nil {
 		if errors.IsAlreadyExists(err) {
 			return ctrl.Result{}, nil
@@ -93,7 +89,6 @@ func (w *PodWatcher) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	// Remove the annotation so we don't trigger again on reschedule
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		var freshPod corev1.Pod
 		if err := w.Get(ctx, types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, &freshPod); err != nil {

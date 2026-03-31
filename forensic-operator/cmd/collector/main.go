@@ -36,7 +36,6 @@ func main() {
 	log.SetLogger(zap.New(zap.UseDevMode(true)))
 	logger := log.Log.WithName("collector")
 
-	// Get auth token from env if not provided via flag
 	if authToken == "" {
 		authToken = os.Getenv("FORENSICS_AUTH_TOKEN")
 		if authToken == "" {
@@ -45,7 +44,6 @@ func main() {
 		}
 	}
 
-	// Ensure storage directory exists
 	if err := os.MkdirAll(storagePath, 0755); err != nil {
 		logger.Error(err, "Failed to create storage directory", "path", storagePath)
 		os.Exit(1)
@@ -58,7 +56,6 @@ func main() {
 	// Create collector handler
 	handler := collector.NewHandler(storagePath, authToken)
 
-	// Setup HTTP server
 	mux := http.NewServeMux()
 	mux.HandleFunc("/trigger", handler.HandleTrigger)
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +71,6 @@ func main() {
 		IdleTimeout:  120 * time.Second,
 	}
 
-	// Start server in background
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Error(err, "HTTP server failed")

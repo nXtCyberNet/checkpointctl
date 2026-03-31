@@ -86,7 +86,7 @@ spec:
 
       containers:
         - name: collector
-          image: forensic-collector:latest   # IMPORTANT: match your built image name
+          image: forensic-collector:latest   
           imagePullPolicy: IfNotPresent
 
           command: ["/collector"]
@@ -104,7 +104,7 @@ spec:
           ports:
             - containerPort: 8080
               name: http
-              hostPort: 8080   # works fine in KIND (single node usually)
+              hostPort: 8080   
 
           volumeMounts:
             - name: checkpoints

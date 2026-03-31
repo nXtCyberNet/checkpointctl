@@ -86,4 +86,3 @@ fi
 echo
 
 echo "Setup completed successfully."
-echo "Debug helper: ./diagnose-latest-snapshot.sh"

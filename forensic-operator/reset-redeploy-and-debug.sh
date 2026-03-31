@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Full reset + rebuild + redeploy + snapshot debug run for forensic-operator on k3s/containerd.
 # Uses current kubectl context.
-#
+#tools using - k3s + nerdctl must be installed on host, and user must have permissions to manage k3s and containerd (e.g. via sudo).
 # Optional overrides:
 #   OPS_NS=forensics-system APP_NS=default TEST_POD=test-app TEST_CONTAINER=test-app
 #   K3S_CTR_SOCK=/run/k3s/containerd/containerd.sock CTR_NS=k8s.io

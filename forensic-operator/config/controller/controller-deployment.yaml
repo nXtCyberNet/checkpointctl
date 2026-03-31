@@ -83,7 +83,7 @@ spec:
 
       containers:
       - name: controller
-        image: forensic-controller:latest          # ← Change to your built image name
+        image: forensic-controller:latest          
         imagePullPolicy: IfNotPresent
 
         command: ["/controller"]
@@ -91,7 +91,7 @@ spec:
           - --collector-url=http://checkpoint-collector.forensics-system.svc:8080
           - --metrics-bind-address=:8080
           - --health-probe-bind-address=:8081
-          - --leader-elect=false          # set true in production
+          - --leader-elect=false         
 
         env:
           - name: FORENSICS_COLLECTOR_URL

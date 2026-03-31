@@ -31,13 +31,11 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	logger := log.FromContext(ctx)
 	start := time.Now()
 
-	// 1. Call collector DaemonSet to copy, hash and move the .tar files
 	collectedFiles, err := b.callCollector(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("collector failed: %w", err), 0
 	}
 
-	// 2. Prepare bundle files
 	bundleDir := filepath.Join("/var/lib/forensics", req.Namespace, req.PodName, req.SnapshotName)
 	if err := os.MkdirAll(bundleDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create bundle directory: %w", err), 0
@@ -50,14 +48,12 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 		return nil, fmt.Errorf("failed to marshal metadata: %w", err), 0
 	}
 
-	// 3. Create snapshot descriptor + manifest
 	snapshotDoc := b.snapshotYAML(req)
 	manifest, err := b.createManifest(collectedFiles, metadataBytes, []byte(snapshotDoc))
 	if err != nil {
 		return nil, err, 0
 	}
 
-	// 4. Write all files to disk and create final .tar.gz
 	if err := b.assembleBundle(bundlePath, collectedFiles, manifest, metadataBytes, []byte(snapshotDoc)); err != nil {
 		return nil, err, 0
 	}
@@ -71,7 +67,6 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 		"bundlePath", bundlePath,
 		"sizeBytes", bundleStat.Size())
 
-	// Compute final SHA256 of the entire bundle
 	sha256sum, err := computeSHA256(bundlePath)
 	if err != nil {
 		return nil, err, 0
@@ -80,15 +75,13 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	return &BuildResult{
 		BundlePath:              bundlePath,
 		SHA256:                  sha256sum,
-		CheckpointDurationMs:    0, // filled by engine if needed
+		CheckpointDurationMs:    0,
 		MetadataFetchDurationMs: 0,
 		BundleSizeBytes:         bundleStat.Size(),
 		ContainersCheckpointed:  req.SelectedContainers,
 	}, nil, time.Since(start)
 }
 
-// callCollector talks to the checkpoint-collector DaemonSet
-// In internal/bundle/builder.go
 func (b *Builder) callCollector(ctx context.Context, req BuildRequest) (map[string]string, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("Starting collector calls", "checkpointCount", len(req.CheckpointPaths), "collectorURL", req.CollectorURL)
@@ -145,7 +138,6 @@ func (b *Builder) callCollector(ctx context.Context, req BuildRequest) (map[stri
 	return collectedFiles, nil
 }
 
-// createManifest generates manifest.json with per-file SHA256
 func (b *Builder) createManifest(files map[string]string, metadataBytes, snapshotBytes []byte) (map[string]string, error) {
 	manifest := make(map[string]string)
 
@@ -167,7 +159,6 @@ func (b *Builder) createManifest(files map[string]string, metadataBytes, snapsho
 	return manifest, nil
 }
 
-// assembleBundle creates the final .tar.gz
 func (b *Builder) assembleBundle(bundlePath string, files map[string]string, manifest map[string]string, metadataBytes, snapshotBytes []byte) error {
 	f, err := os.Create(bundlePath)
 	if err != nil {
@@ -283,7 +274,6 @@ func waitForReadableFile(path string, attempts int, delay time.Duration) error {
 	return lastErr
 }
 
-// computeSHA256 is a small helper used everywhere
 func computeSHA256(path string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {

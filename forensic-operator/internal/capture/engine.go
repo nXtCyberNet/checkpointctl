@@ -14,7 +14,6 @@ import (
 	"github.com/nxtcybernet/checkpointctl/internal/container"
 )
 
-// Request represents a capture request
 type Request struct {
 	Namespace           string
 	PodName             string
@@ -24,7 +23,6 @@ type Request struct {
 	Priority            string   // low|normal|high
 }
 
-// Result holds the outcome of a capture operation
 type Result struct {
 	BundlePath              string
 	SHA256                  string
@@ -34,7 +32,6 @@ type Result struct {
 	ContainersCheckpointed  []forensicsv1alpha1.ContainerCheckpointed
 }
 
-// PrefetchResult contains data discovered during prefetch.
 type PrefetchResult struct {
 	PodInfo                *PodInfo
 	NodeName               string
@@ -43,14 +40,12 @@ type PrefetchResult struct {
 	ContainersCheckpointed []forensicsv1alpha1.ContainerCheckpointed
 }
 
-// Engine orchestrates the forensic capture process
 type Engine struct {
 	client        kubernetes.Interface
 	bundleBuilder *bundle.Builder
-	collectorURL  string // e.g. http://checkpoint-collector.default.svc:8080
+	collectorURL  string // svc url
 }
 
-// NewEngine creates a new capture engine
 func NewEngine(client kubernetes.Interface, bundleBuilder *bundle.Builder, collectorURL string) *Engine {
 	return &Engine{
 		client:        client,
@@ -59,7 +54,6 @@ func NewEngine(client kubernetes.Interface, bundleBuilder *bundle.Builder, colle
 	}
 }
 
-// Prefetch resolves pod details and validates requested container selection.
 func (e *Engine) Prefetch(ctx context.Context, req Request) (*PrefetchResult, error) {
 	podInfo, err := e.prefetchPodInfo(ctx, req.Namespace, req.PodName)
 	if err != nil {
@@ -87,7 +81,7 @@ func (e *Engine) Execute(ctx context.Context, req Request) (*Result, error) {
 
 	logger.Info("Starting forensic capture", "pod", req.PodName, "namespace", req.Namespace)
 
-	// Phase 1: Prefetch (Chicken-and-Egg solution)
+	// Phase 1: Prefetch
 	prefetchStart := time.Now()
 	prefetchResult, err := e.Prefetch(ctx, req)
 	if err != nil {
@@ -103,7 +97,7 @@ func (e *Engine) Execute(ctx context.Context, req Request) (*Result, error) {
 		"selectedContainers", selectedContainers,
 		"durationMs", time.Since(prefetchStart).Milliseconds())
 
-	// Phase 2: Parallel Capture (The Frozen Moment)
+	// Phase 2: Parallel Capture
 	var (
 		wg              sync.WaitGroup
 		checkpointPaths []string
@@ -146,7 +140,6 @@ func (e *Engine) Execute(ctx context.Context, req Request) (*Result, error) {
 
 	wg.Wait()
 
-	// Strict partial failure rejection (as per proposal 4.7)
 	if checkpointErr != nil || metadataErr != nil {
 		return nil, fmt.Errorf("partial capture rejected - checkpointErr: %v, metadataErr: %v",
 			checkpointErr, metadataErr)

@@ -14,31 +14,26 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// TriggerRequest is what the controller sends to the collector
 type TriggerRequest struct {
 	CheckpointPath string `json:"checkpointPath"`
 	BundleKey      string `json:"bundleKey"`
 	SnapshotName   string `json:"snapshotName"`
 }
 
-// CollectorResponse is returned to the controller
 type CollectorResponse struct {
 	BundlePath string `json:"bundlePath"`
 	SHA256     string `json:"sha256"`
 }
 
-// Handler is the HTTP handler for the checkpoint-collector DaemonSet
 type Handler struct {
 	storagePath string
 	authToken   string
 }
 
-// NewHandler creates the collector handler
 func NewHandler(storagePath, authToken string) *Handler {
 	return &Handler{storagePath: storagePath, authToken: authToken}
 }
 
-// HandleTrigger is the main endpoint: POST /trigger
 func (h *Handler) HandleTrigger(w http.ResponseWriter, r *http.Request) {
 	logger := log.FromContext(r.Context())
 	start := time.Now()
@@ -64,7 +59,6 @@ func (h *Handler) HandleTrigger(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Destination directory derived from the bundle key
 	destDir := filepath.Join(h.storagePath, req.BundleKey)
 	if err := os.MkdirAll(destDir, 0755); err != nil {
 		logger.Error(err, "Failed to create destination directory", "path", destDir)
@@ -72,13 +66,9 @@ func (h *Handler) HandleTrigger(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// THE FIX: use the original checkpoint filename as the saved file name.
-	// The old code returned a "bundle.tar.gz" path that was NEVER written to
-	// disk, so the bundle builder always hit "no such file or directory" and
-	// wrote a .missing.txt placeholder instead of real CRIU data.
 	finalCheckpointPath := filepath.Join(destDir, filepath.Base(req.CheckpointPath))
 
-	// Stage in the same directory so os.Rename is always on-device (no cross-device error)
+	// Stage in the same directory so os.Rename is always on-device and thus atomic. This also ensures the final file has the same permissions as the dest directory (important when /var/lib/forensics is mounted with restrictive permissions).
 	tempPath := filepath.Join(destDir, fmt.Sprintf(".%s.tmp", filepath.Base(req.CheckpointPath)))
 
 	if err := copyFile(req.CheckpointPath, tempPath); err != nil {
@@ -110,7 +100,7 @@ func (h *Handler) HandleTrigger(w http.ResponseWriter, r *http.Request) {
 
 	// Best-effort cleanup of the original kubelet checkpoint file.
 	// Will fail when /var/lib/kubelet/checkpoints is mounted read-only — that
-	// is acceptable; log it and continue.
+	// is acceptable; log it and continue. , based on rbac rules
 	if err := os.Remove(req.CheckpointPath); err != nil {
 		logger.Error(err, "Failed to remove original checkpoint file", "path", req.CheckpointPath)
 	}
@@ -121,7 +111,6 @@ func (h *Handler) HandleTrigger(w http.ResponseWriter, r *http.Request) {
 		"sha256", sha256sum,
 		"durationMs", time.Since(start).Milliseconds())
 
-	// Return the ACTUAL path on disk so the bundle builder can read the file.
 	resp := CollectorResponse{
 		BundlePath: finalCheckpointPath,
 		SHA256:     sha256sum,

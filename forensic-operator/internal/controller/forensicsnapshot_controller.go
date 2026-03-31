@@ -18,7 +18,6 @@ import (
 	"github.com/nxtcybernet/checkpointctl/internal/capture"
 )
 
-// ForensicSnapshotReconciler reconciles a ForensicSnapshot object
 type ForensicSnapshotReconciler struct {
 	client.Client
 	Scheme        *runtime.Scheme
@@ -108,7 +107,6 @@ func (r *ForensicSnapshotReconciler) reconcileCapture(ctx context.Context, snaps
 	}
 }
 
-// doPrefetch resolves pod info and container selection.
 func (r *ForensicSnapshotReconciler) doPrefetch(ctx context.Context, snapshot *forensicsv1alpha1.ForensicSnapshot) (ctrl.Result, error) {
 	// Advance phase first so a requeue cannot re-enter doPrefetch
 	snapshot.Status.Phase = "Prefetching"
@@ -155,13 +153,6 @@ func (r *ForensicSnapshotReconciler) doPrefetch(ctx context.Context, snapshot *f
 	return ctrl.Result{Requeue: true}, nil
 }
 
-// doCapture runs the parallel "Frozen Moment" capture.
-//
-// KEY FIX: all status writes use RetryOnConflict so that a stale-resource-version
-// error is resolved in-process instead of via a Requeue. Without this, a conflict
-// on the final "Sealed" write requeued the reconciler, which saw phase ==
-// "Prefetching" again, bypassed the terminal-state guard, and fired a second
-// CRIU checkpoint against the same snapshot.
 func (r *ForensicSnapshotReconciler) doCapture(ctx context.Context, snapshot *forensicsv1alpha1.ForensicSnapshot) (ctrl.Result, error) {
 	// Acquire capture lock: only the reconcile that successfully flips
 	// Prefetching -> Capturing is allowed to execute CRIU/bundle logic.
@@ -220,7 +211,7 @@ func (r *ForensicSnapshotReconciler) doCapture(ctx context.Context, snapshot *fo
 				return fetchErr
 			}
 			if latest.Status.Phase == "Sealed" || latest.Status.Phase == "Failed" {
-				return nil // already terminal, nothing to do
+				return nil
 			}
 			latest.Status.Phase = "Failed"
 			latest.Status.FailureReason = err.Error()
@@ -255,12 +246,9 @@ func (r *ForensicSnapshotReconciler) doCapture(ctx context.Context, snapshot *fo
 		return r.Status().Update(ctx, &latest)
 	})
 
-	// No Requeue on success. Any future requeue for this object hits the
-	// terminal-state guard at the top of Reconcile() and exits immediately.
 	return ctrl.Result{}, updateErr
 }
 
-// SetupWithManager sets up the controller
 func (r *ForensicSnapshotReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&forensicsv1alpha1.ForensicSnapshot{}).
