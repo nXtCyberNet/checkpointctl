@@ -1,7 +1,9 @@
 package bundle
 
 import (
+	"archive/tar"
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -11,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/nxtcybernet/checkpointctl/internal/collector"
@@ -42,14 +45,20 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 
 	bundlePath := filepath.Join(bundleDir, fmt.Sprintf("forensic-%s.bundle.tar.gz", req.SnapshotName))
 
-	// 3. Create manifest.json (integrity root)
-	manifest, err := b.createManifest(collectedFiles, req.Metadata, req.SnapshotName)
+	metadataBytes, err := json.MarshalIndent(req.Metadata, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal metadata: %w", err), 0
+	}
+
+	// 3. Create snapshot descriptor + manifest
+	snapshotDoc := b.snapshotYAML(req)
+	manifest, err := b.createManifest(collectedFiles, metadataBytes, []byte(snapshotDoc))
 	if err != nil {
 		return nil, err, 0
 	}
 
 	// 4. Write all files to disk and create final .tar.gz
-	if err := b.assembleBundle(bundlePath, collectedFiles, manifest, req); err != nil {
+	if err := b.assembleBundle(bundlePath, collectedFiles, manifest, metadataBytes, []byte(snapshotDoc)); err != nil {
 		return nil, err, 0
 	}
 
@@ -89,8 +98,9 @@ func (b *Builder) callCollector(ctx context.Context, req BuildRequest) (map[stri
 	}
 
 	client := &http.Client{Timeout: 60 * time.Second}
+	collectedFiles := make(map[string]string)
 
-	for _, cpPath := range req.CheckpointPaths {
+	for idx, cpPath := range req.CheckpointPaths {
 		logger.Info("Triggering collector", "checkpointPath", cpPath, "snapshot", req.SnapshotName)
 
 		payload := collector.TriggerRequest{
@@ -116,51 +126,150 @@ func (b *Builder) callCollector(ctx context.Context, req BuildRequest) (map[stri
 			return nil, fmt.Errorf("collector returned %d", resp.StatusCode)
 		}
 
+		var collectorResp collector.CollectorResponse
+		if err := json.NewDecoder(resp.Body).Decode(&collectorResp); err != nil {
+			return nil, fmt.Errorf("collector response decode failed: %w", err)
+		}
+
+		if collectorResp.BundlePath == "" {
+			return nil, fmt.Errorf("collector returned empty bundle path for %s", cpPath)
+		}
+
+		archiveName := filepath.Join("checkpoints", fmt.Sprintf("%02d-%s", idx, filepath.Base(collectorResp.BundlePath)))
+		collectedFiles[archiveName] = collectorResp.BundlePath
+
 		logger.Info("Collector request succeeded", "checkpointPath", cpPath)
 	}
 
 	logger.Info("Collector calls completed", "snapshot", req.SnapshotName)
-	return nil, nil // collector already moved the files
+	return collectedFiles, nil
 }
 
 // createManifest generates manifest.json with per-file SHA256
-func (b *Builder) createManifest(files map[string]string, meta any, snapshotName string) (map[string]string, error) {
+func (b *Builder) createManifest(files map[string]string, metadataBytes, snapshotBytes []byte) (map[string]string, error) {
 	manifest := make(map[string]string)
 
 	for bundlePath, realPath := range files {
-		sha, err := computeSHA256(realPath)
-		if err != nil {
-			return nil, err
+		if _, err := os.Stat(realPath); err == nil {
+			sha, err := computeSHA256(realPath)
+			if err != nil {
+				return nil, err
+			}
+			manifest[bundlePath] = sha
+			continue
 		}
-		manifest[bundlePath] = sha
+
+		// Keep track of inaccessible file paths so investigations still have evidence.
+		manifest[bundlePath] = "UNAVAILABLE"
 	}
 
-	// Add metadata.json and ForensicSnapshot.yaml (will be written later)
-	manifest["metadata.json"] = "PLACEHOLDER" // will be replaced after writing
-	manifest["ForensicSnapshot.yaml"] = "PLACEHOLDER"
+	manifest["metadata.json"] = hashBytes(metadataBytes)
+	manifest["ForensicSnapshot.yaml"] = hashBytes(snapshotBytes)
 
 	return manifest, nil
 }
 
 // assembleBundle creates the final .tar.gz
-func (b *Builder) assembleBundle(bundlePath string, files map[string]string, manifest map[string]string, req BuildRequest) error {
-	// For PoC we use a simple tar writer (you can use github.com/klauspost/pgzip for better compression)
-	// Simplified version - in real code you would create proper tar.gz
+func (b *Builder) assembleBundle(bundlePath string, files map[string]string, manifest map[string]string, metadataBytes, snapshotBytes []byte) error {
 	f, err := os.Create(bundlePath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	// TODO: Implement proper tar.gz writing with all files:
-	// - checkpoint/*.tar
-	// - metadata.json
-	// - ForensicSnapshot.yaml (current CR state)
-	// - manifest.json
+	gz := gzip.NewWriter(f)
+	defer gz.Close()
 
-	// For now we just create an empty file so the flow works
-	// Replace this with real tar writer in next iteration
+	tw := tar.NewWriter(gz)
+	defer tw.Close()
+
+	archivePaths := make([]string, 0, len(files))
+	for archivePath := range files {
+		archivePaths = append(archivePaths, archivePath)
+	}
+	sort.Strings(archivePaths)
+
+	for _, archivePath := range archivePaths {
+		realPath := files[archivePath]
+		if err := addFileToTar(tw, archivePath, realPath); err != nil {
+			// Keep bundle creation resilient even if one source path is missing.
+			if err := addBytesToTar(tw, archivePath+".missing.txt", []byte(err.Error())); err != nil {
+				return err
+			}
+		}
+	}
+
+	if err := addBytesToTar(tw, "metadata.json", metadataBytes); err != nil {
+		return err
+	}
+	if err := addBytesToTar(tw, "ForensicSnapshot.yaml", snapshotBytes); err != nil {
+		return err
+	}
+
+	manifestBytes, err := json.MarshalIndent(manifest, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := addBytesToTar(tw, "manifest.json", manifestBytes); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (b *Builder) snapshotYAML(req BuildRequest) string {
+	return fmt.Sprintf(
+		"apiVersion: forensics.cybernet.dev/v1alpha1\nkind: ForensicSnapshot\nmetadata:\n  name: %s\n  namespace: %s\nspec:\n  podName: %s\n  nodeName: %s\n",
+		req.SnapshotName,
+		req.Namespace,
+		req.PodName,
+		req.NodeName,
+	)
+}
+
+func addFileToTar(tw *tar.Writer, archivePath, filePath string) error {
+	f, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	st, err := f.Stat()
+	if err != nil {
+		return err
+	}
+
+	hdr := &tar.Header{
+		Name:    archivePath,
+		Mode:    0644,
+		Size:    st.Size(),
+		ModTime: st.ModTime(),
+	}
+	if err := tw.WriteHeader(hdr); err != nil {
+		return err
+	}
+
+	_, err = io.Copy(tw, f)
+	return err
+}
+
+func addBytesToTar(tw *tar.Writer, archivePath string, data []byte) error {
+	hdr := &tar.Header{
+		Name:    archivePath,
+		Mode:    0644,
+		Size:    int64(len(data)),
+		ModTime: time.Now(),
+	}
+	if err := tw.WriteHeader(hdr); err != nil {
+		return err
+	}
+	_, err := tw.Write(data)
+	return err
+}
+
+func hashBytes(data []byte) string {
+	h := sha256.Sum256(data)
+	return hex.EncodeToString(h[:])
 }
 
 // computeSHA256 is a small helper used everywhere

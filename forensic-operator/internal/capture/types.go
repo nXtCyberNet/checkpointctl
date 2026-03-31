@@ -15,15 +15,27 @@ type PodInfo struct {
 
 // ForensicMetadata contains rich context around the checkpoint
 type ForensicMetadata struct {
+	CapturedAt      metav1.Time
 	PodSpec         *corev1.PodSpec
 	Labels          map[string]string
 	Annotations     map[string]string
 	OwnerReferences []metav1.OwnerReference
 	EnvVars         map[string]string
+	PodStatus       PodStatusSnapshot
 	NetworkPolicies []string
 	Events          []corev1.Event
 	NodeInfo        NodeInfo
 	ClusterInfo     ClusterInfo
+}
+
+type PodStatusSnapshot struct {
+	Phase               corev1.PodPhase
+	PodIP               string
+	HostIP              string
+	StartTime           *metav1.Time
+	QOSClass            corev1.PodQOSClass
+	ContainerStates     map[string]string
+	ContainerRestartCnt map[string]int32
 }
 
 // NodeInfo and ClusterInfo can be expanded as needed
@@ -32,6 +44,9 @@ type NodeInfo struct {
 	KernelVersion    string
 	KubeletVersion   string
 	ContainerRuntime string
+	OSImage          string
+	Architecture     string
+	OperatingSystem  string
 }
 
 type ClusterInfo struct {

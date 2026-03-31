@@ -1,0 +1,8 @@
+apiVersion: forensics.cybernet.dev/v1alpha1
+kind: ForensicSnapshot
+metadata:
+  name: test-app-20260330174101
+  namespace: default
+spec:
+  podName: test-app
+  nodeName: cybernet

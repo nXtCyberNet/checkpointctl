@@ -31,6 +31,11 @@ rules:
     resources: ["nodes/proxy"]
     verbs: ["create", "get"]
 
+  # Required to enrich metadata with node details (kernel, kubelet, OS image)
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list"]
+
   # Full access to our own CRD
   - apiGroups: ["forensics.cybernet.dev"]
     resources: ["forensicsnapshots"]

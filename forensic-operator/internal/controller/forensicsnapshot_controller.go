@@ -32,6 +32,7 @@ const (
 // +kubebuilder:rbac:groups=forensics.cybernet.dev,resources=forensicsnapshots/finalizers,verbs=update
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;update;patch
 // +kubebuilder:rbac:groups=core,resources=nodes/proxy,verbs=create
+// +kubebuilder:rbac:groups=core,resources=nodes,verbs=get;list
 // +kubebuilder:rbac:groups=core,resources=events,verbs=list
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list
 
@@ -49,6 +50,9 @@ func (r *ForensicSnapshotReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if controllerutil.ContainsFinalizer(&snapshot, finalizerName) {
 			controllerutil.RemoveFinalizer(&snapshot, finalizerName)
 			if err := r.Update(ctx, &snapshot); err != nil {
+				if errors.IsConflict(err) {
+					return ctrl.Result{Requeue: true}, nil
+				}
 				return ctrl.Result{}, err
 			}
 		}
@@ -59,6 +63,9 @@ func (r *ForensicSnapshotReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if !controllerutil.ContainsFinalizer(&snapshot, finalizerName) {
 		controllerutil.AddFinalizer(&snapshot, finalizerName)
 		if err := r.Update(ctx, &snapshot); err != nil {
+			if errors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{Requeue: true}, nil
@@ -75,6 +82,9 @@ func (r *ForensicSnapshotReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		snapshot.Status.StartedAt = metav1.Now()
 		snapshot.Status.CaptureID = fmt.Sprintf("fc-%s", time.Now().Format("20060102150405"))
 		if err := r.Status().Update(ctx, &snapshot); err != nil {
+			if errors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{Requeue: true}, nil
@@ -102,6 +112,9 @@ func (r *ForensicSnapshotReconciler) reconcileCapture(ctx context.Context, snaps
 func (r *ForensicSnapshotReconciler) doPrefetch(ctx context.Context, snapshot *forensicsv1alpha1.ForensicSnapshot) (ctrl.Result, error) {
 	snapshot.Status.Phase = "Prefetching"
 	if err := r.Status().Update(ctx, snapshot); err != nil {
+		if errors.IsConflict(err) {
+			return ctrl.Result{Requeue: true}, nil
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -125,6 +138,9 @@ func (r *ForensicSnapshotReconciler) doPrefetch(ctx context.Context, snapshot *f
 	snapshot.Spec.ContainersCheckpointed = prefetch.ContainersCheckpointed
 
 	if err := r.Update(ctx, snapshot); err != nil {
+		if errors.IsConflict(err) {
+			return ctrl.Result{Requeue: true}, nil
+		}
 		return ctrl.Result{}, err
 	}
 	return ctrl.Result{Requeue: true}, nil
@@ -160,6 +176,9 @@ func (r *ForensicSnapshotReconciler) doCapture(ctx context.Context, snapshot *fo
 	snapshot.Status.BundleSizeBytes = result.BundleSizeBytes
 
 	if err := r.Status().Update(ctx, snapshot); err != nil {
+		if errors.IsConflict(err) {
+			return ctrl.Result{Requeue: true}, nil
+		}
 		return ctrl.Result{}, err
 	}
 
