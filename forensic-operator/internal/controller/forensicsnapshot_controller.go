@@ -8,6 +8,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -71,12 +73,14 @@ func (r *ForensicSnapshotReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	// Skip if already done
+	// Terminal state guard — this is the primary defence against duplicate
+	// CRIU checkpoints when the controller requeues after a conflict on the
+	// final status update. If the snapshot is already done, do nothing.
 	if snapshot.Status.Phase == "Sealed" || snapshot.Status.Phase == "Failed" {
 		return ctrl.Result{}, nil
 	}
 
-	// Initialize status on first reconciliation
+	// Initialise status on the very first reconciliation
 	if snapshot.Status.Phase == "" {
 		snapshot.Status.Phase = "Pending"
 		snapshot.Status.StartedAt = metav1.Now()
@@ -90,7 +94,6 @@ func (r *ForensicSnapshotReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	// Main capture logic
 	return r.reconcileCapture(ctx, &snapshot)
 }
 
@@ -98,18 +101,16 @@ func (r *ForensicSnapshotReconciler) reconcileCapture(ctx context.Context, snaps
 	switch snapshot.Status.Phase {
 	case "Pending":
 		return r.doPrefetch(ctx, snapshot)
-
 	case "Prefetching":
 		return r.doCapture(ctx, snapshot)
-
 	default:
-		// For Capturing/Collecting/Sealing phases we requeue briefly
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 }
 
-// doPrefetch: Get pod info + apply container selection
+// doPrefetch resolves pod info and container selection.
 func (r *ForensicSnapshotReconciler) doPrefetch(ctx context.Context, snapshot *forensicsv1alpha1.ForensicSnapshot) (ctrl.Result, error) {
+	// Advance phase first so a requeue cannot re-enter doPrefetch
 	snapshot.Status.Phase = "Prefetching"
 	if err := r.Status().Update(ctx, snapshot); err != nil {
 		if errors.IsConflict(err) {
@@ -132,22 +133,71 @@ func (r *ForensicSnapshotReconciler) doPrefetch(ctx context.Context, snapshot *f
 		return ctrl.Result{}, err
 	}
 
-	// Update spec with discovered info
-	snapshot.Spec.NodeName = prefetch.NodeName
-	snapshot.Spec.PodUID = prefetch.PodUID
-	snapshot.Spec.ContainersCheckpointed = prefetch.ContainersCheckpointed
-
-	if err := r.Update(ctx, snapshot); err != nil {
-		if errors.IsConflict(err) {
-			return ctrl.Result{Requeue: true}, nil
+	// Persist discovered spec fields with RetryOnConflict so a stale resource
+	// version never silently drops NodeName / PodUID before doCapture reads them.
+	updateErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		var latest forensicsv1alpha1.ForensicSnapshot
+		if fetchErr := r.Get(ctx, types.NamespacedName{
+			Name:      snapshot.Name,
+			Namespace: snapshot.Namespace,
+		}, &latest); fetchErr != nil {
+			return fetchErr
 		}
-		return ctrl.Result{}, err
+		latest.Spec.NodeName = prefetch.NodeName
+		latest.Spec.PodUID = prefetch.PodUID
+		latest.Spec.ContainersCheckpointed = prefetch.ContainersCheckpointed
+		return r.Update(ctx, &latest)
+	})
+	if updateErr != nil {
+		return ctrl.Result{}, updateErr
 	}
+
 	return ctrl.Result{Requeue: true}, nil
 }
 
-// doCapture: Run the parallel "Frozen Moment" capture
+// doCapture runs the parallel "Frozen Moment" capture.
+//
+// KEY FIX: all status writes use RetryOnConflict so that a stale-resource-version
+// error is resolved in-process instead of via a Requeue. Without this, a conflict
+// on the final "Sealed" write requeued the reconciler, which saw phase ==
+// "Prefetching" again, bypassed the terminal-state guard, and fired a second
+// CRIU checkpoint against the same snapshot.
 func (r *ForensicSnapshotReconciler) doCapture(ctx context.Context, snapshot *forensicsv1alpha1.ForensicSnapshot) (ctrl.Result, error) {
+	// Acquire capture lock: only the reconcile that successfully flips
+	// Prefetching -> Capturing is allowed to execute CRIU/bundle logic.
+	transitioned := false
+	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		var latest forensicsv1alpha1.ForensicSnapshot
+		if fetchErr := r.Get(ctx, types.NamespacedName{
+			Name:      snapshot.Name,
+			Namespace: snapshot.Namespace,
+		}, &latest); fetchErr != nil {
+			return fetchErr
+		}
+
+		// Another reconcile already moved forward or finished.
+		if latest.Status.Phase == "Sealed" || latest.Status.Phase == "Failed" || latest.Status.Phase == "Capturing" {
+			return nil
+		}
+		if latest.Status.Phase != "Prefetching" {
+			return nil
+		}
+
+		latest.Status.Phase = "Capturing"
+		if updateErr := r.Status().Update(ctx, &latest); updateErr != nil {
+			return updateErr
+		}
+		transitioned = true
+		return nil
+	}); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if !transitioned {
+		// A concurrent reconcile already owns or finished this snapshot.
+		return ctrl.Result{RequeueAfter: 2 * time.Second}, nil
+	}
+
 	req := capture.Request{
 		Namespace:           snapshot.Spec.Namespace,
 		PodName:             snapshot.Spec.PodName,
@@ -159,30 +209,55 @@ func (r *ForensicSnapshotReconciler) doCapture(ctx context.Context, snapshot *fo
 
 	result, err := r.CaptureEngine.Execute(ctx, req)
 	if err != nil {
-		snapshot.Status.Phase = "Failed"
-		snapshot.Status.FailureReason = err.Error()
-		_ = r.Status().Update(ctx, snapshot)
+		// Write failure status; RetryOnConflict ensures it lands even if the
+		// resource version changed since we last fetched the snapshot.
+		_ = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			var latest forensicsv1alpha1.ForensicSnapshot
+			if fetchErr := r.Get(ctx, types.NamespacedName{
+				Name:      snapshot.Name,
+				Namespace: snapshot.Namespace,
+			}, &latest); fetchErr != nil {
+				return fetchErr
+			}
+			if latest.Status.Phase == "Sealed" || latest.Status.Phase == "Failed" {
+				return nil // already terminal, nothing to do
+			}
+			latest.Status.Phase = "Failed"
+			latest.Status.FailureReason = err.Error()
+			return r.Status().Update(ctx, &latest)
+		})
 		return ctrl.Result{}, err
 	}
 
-	// Success - mark as Sealed
-	snapshot.Status.Phase = "Sealed"
-	snapshot.Status.BundlePath = result.BundlePath
-	snapshot.Status.SHA256 = result.SHA256
-	snapshot.Status.CapturedAt = metav1.Now()
-	snapshot.Status.CompletedAt = metav1.Now()
-	snapshot.Status.CheckpointDurationMs = result.CheckpointDurationMs
-	snapshot.Status.MetadataFetchDurationMs = result.MetadataFetchDurationMs
-	snapshot.Status.BundleSizeBytes = result.BundleSizeBytes
-
-	if err := r.Status().Update(ctx, snapshot); err != nil {
-		if errors.IsConflict(err) {
-			return ctrl.Result{Requeue: true}, nil
+	// Write success status with RetryOnConflict + idempotency guard.
+	// Re-fetching inside the loop guarantees we apply to the latest resource
+	// version. The terminal-state check prevents a second write if two
+	// reconciles somehow race to this point.
+	updateErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		var latest forensicsv1alpha1.ForensicSnapshot
+		if fetchErr := r.Get(ctx, types.NamespacedName{
+			Name:      snapshot.Name,
+			Namespace: snapshot.Namespace,
+		}, &latest); fetchErr != nil {
+			return fetchErr
 		}
-		return ctrl.Result{}, err
-	}
+		if latest.Status.Phase == "Sealed" || latest.Status.Phase == "Failed" {
+			return nil // idempotency guard — already done
+		}
+		latest.Status.Phase = "Sealed"
+		latest.Status.BundlePath = result.BundlePath
+		latest.Status.SHA256 = result.SHA256
+		latest.Status.CapturedAt = metav1.Now()
+		latest.Status.CompletedAt = metav1.Now()
+		latest.Status.CheckpointDurationMs = result.CheckpointDurationMs
+		latest.Status.MetadataFetchDurationMs = result.MetadataFetchDurationMs
+		latest.Status.BundleSizeBytes = result.BundleSizeBytes
+		return r.Status().Update(ctx, &latest)
+	})
 
-	return ctrl.Result{}, nil
+	// No Requeue on success. Any future requeue for this object hits the
+	// terminal-state guard at the top of Reconcile() and exits immediately.
+	return ctrl.Result{}, updateErr
 }
 
 // SetupWithManager sets up the controller

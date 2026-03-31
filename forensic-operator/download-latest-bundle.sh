@@ -9,7 +9,6 @@ set -euo pipefail
 #   OUT_DIR=./downloads
 #   CONTROLLER_LABEL=app=forensic-controller
 
-KUBECONFIG="${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
 OPS_NS="${OPS_NS:-forensics-system}"
 OUT_DIR="${OUT_DIR:-./downloads}"
 CONTROLLER_LABEL="${CONTROLLER_LABEL:-app=forensic-controller}"

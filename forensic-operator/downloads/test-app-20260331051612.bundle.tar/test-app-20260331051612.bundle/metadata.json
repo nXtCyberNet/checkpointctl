@@ -1,4 +1,5 @@
 {
+  "CapturedAt": "2026-03-31T05:16:12Z",
   "PodSpec": {
     "volumes": [
       {
@@ -93,16 +94,32 @@
   "Annotations": null,
   "OwnerReferences": null,
   "EnvVars": {},
+  "PodStatus": {
+    "Phase": "Running",
+    "PodIP": "10.42.0.142",
+    "HostIP": "172.21.115.182",
+    "StartTime": "2026-03-30T13:26:04Z",
+    "QOSClass": "BestEffort",
+    "ContainerStates": {
+      "test-app": "running(startedAt=2026-03-30T13:26:24Z)"
+    },
+    "ContainerRestartCnt": {
+      "test-app": 0
+    }
+  },
   "NetworkPolicies": null,
   "Events": null,
   "NodeInfo": {
     "Name": "cybernet",
-    "KernelVersion": "",
-    "KubeletVersion": "",
-    "ContainerRuntime": "containerd://b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd"
+    "KernelVersion": "6.6.87.2-microsoft-standard-WSL2",
+    "KubeletVersion": "v1.34.5+k3s1",
+    "ContainerRuntime": "containerd://b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd",
+    "OSImage": "Ubuntu 24.04.4 LTS",
+    "Architecture": "amd64",
+    "OperatingSystem": "linux"
   },
   "ClusterInfo": {
-    "KubernetesVersion": "",
-    "CloudProvider": ""
+    "KubernetesVersion": "v1.34.5+k3s1",
+    "CloudProvider": "k3s"
   }
 }

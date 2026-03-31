@@ -108,6 +108,10 @@ spec:
           - containerPort: 8081
             name: health
 
+        volumeMounts:
+          - name: forensics-storage
+            mountPath: /var/lib/forensics
+
         resources:
           requests:
             cpu: "200m"
@@ -133,3 +137,9 @@ spec:
       # Tolerations if you want to run on all nodes
       tolerations:
         - operator: Exists
+
+      volumes:
+        - name: forensics-storage
+          hostPath:
+            path: /var/lib/forensics
+            type: DirectoryOrCreate

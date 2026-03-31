@@ -1,0 +1,778 @@
+(00.000000) CRIU run id = a3bbb4c9-a0d8-4f87-a76f-7bda600215da
+(00.000000) CRIU run id = d03198b4-1766-44e0-bdcc-545789fbb483
+(00.000000) Would overwrite RPC settings with values from /etc/criu/runc.conf
+(00.000116) Version: 4.2 (gitid 0)
+(00.000120) Running on cybernet Linux 6.6.87.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025 x86_64
+(00.000214) Loaded kdat cache from /run/criu.kdat
+(00.000732) Hugetlb size 2 Mb is supported but cannot get dev's number
+(00.000818) Hugetlb size 1024 Mb is supported but cannot get dev's number
+(00.003328) cpu: x86_family 25 x86_vendor_id AuthenticAMD x86_model_id AMD Ryzen 5 6600H with Radeon Graphics         
+(00.003378) cpu: fpu: xfeatures_mask 0x5 xsave_size 832 xsave_size_max 832 xsaves_size 848
+(00.003393) cpu: fpu: x87 floating point registers     xstate_offsets      0 / 0      xstate_sizes    160 / 160   
+(00.003397) cpu: fpu: AVX registers                    xstate_offsets    576 / 576    xstate_sizes    256 / 256   
+(00.007140) ========================================
+(00.007226) Dumping processes (pid: 187621 comm: sleep)
+(00.007231) ========================================
+(00.007239) rlimit: RLIMIT_NOFILE unlimited for self
+(00.007258) Running pre-dump scripts
+(00.007261) 	RPC
+(00.010398) Plugin "cuda_plugin" (version 512 hooks 13)
+(00.010446) 	   9 -> 0x77cf9c523d79
+(00.010450) 	  10 -> 0x77cf9c523789
+(00.010452) 	  11 -> 0x77cf9c5234d9
+(00.010487) cuda_plugin: No GPU device found; CUDA plugin is disabled
+(00.010736) irmap: Searching irmap cache in work dir
+(00.010763) No irmap-cache image
+(00.010767) irmap: Searching irmap cache in parent
+(00.010787) No parent images directory provided
+(00.010791) irmap: No irmap cache
+(00.010793) cpu: fpu:1 fxsr:1 xsave:1 xsaveopt:1 xsavec:1 xgetbv1:1 xsaves:1
+(00.011338) cg-prop: Parsing controller "cpu"
+(00.011349) cg-prop: 	Strategy "replace"
+(00.011354) cg-prop: 	Property "cpu.shares"
+(00.011356) cg-prop: 	Property "cpu.cfs_period_us"
+(00.011358) cg-prop: 	Property "cpu.cfs_quota_us"
+(00.011377) cg-prop: 	Property "cpu.rt_period_us"
+(00.011380) cg-prop: 	Property "cpu.rt_runtime_us"
+(00.011382) cg-prop: Parsing controller "memory"
+(00.011385) cg-prop: 	Strategy "replace"
+(00.011387) cg-prop: 	Property "memory.limit_in_bytes"
+(00.011389) cg-prop: 	Property "memory.memsw.limit_in_bytes"
+(00.011391) cg-prop: 	Property "memory.swappiness"
+(00.011394) cg-prop: 	Property "memory.soft_limit_in_bytes"
+(00.011396) cg-prop: 	Property "memory.move_charge_at_immigrate"
+(00.011398) cg-prop: 	Property "memory.oom_control"
+(00.011405) cg-prop: 	Property "memory.use_hierarchy"
+(00.011408) cg-prop: 	Property "memory.kmem.limit_in_bytes"
+(00.011410) cg-prop: 	Property "memory.kmem.tcp.limit_in_bytes"
+(00.011412) cg-prop: Parsing controller "cpuset"
+(00.011415) cg-prop: 	Strategy "replace"
+(00.011417) cg-prop: 	Property "cpuset.cpus"
+(00.011419) cg-prop: 	Property "cpuset.mems"
+(00.011421) cg-prop: 	Property "cpuset.memory_migrate"
+(00.011423) cg-prop: 	Property "cpuset.cpu_exclusive"
+(00.011425) cg-prop: 	Property "cpuset.mem_exclusive"
+(00.011427) cg-prop: 	Property "cpuset.mem_hardwall"
+(00.011430) cg-prop: 	Property "cpuset.memory_spread_page"
+(00.011432) cg-prop: 	Property "cpuset.memory_spread_slab"
+(00.011434) cg-prop: 	Property "cpuset.sched_load_balance"
+(00.011436) cg-prop: 	Property "cpuset.sched_relax_domain_level"
+(00.011439) cg-prop: Parsing controller "blkio"
+(00.011441) cg-prop: 	Strategy "replace"
+(00.011444) cg-prop: 	Property "blkio.weight"
+(00.011446) cg-prop: Parsing controller "freezer"
+(00.011448) cg-prop: 	Strategy "replace"
+(00.011450) cg-prop: Parsing controller "perf_event"
+(00.011452) cg-prop: 	Strategy "replace"
+(00.011454) cg-prop: Parsing controller "net_cls"
+(00.011457) cg-prop: 	Strategy "replace"
+(00.011459) cg-prop: 	Property "net_cls.classid"
+(00.011461) cg-prop: Parsing controller "net_prio"
+(00.011463) cg-prop: 	Strategy "replace"
+(00.011466) cg-prop: 	Property "net_prio.ifpriomap"
+(00.011468) cg-prop: Parsing controller "pids"
+(00.011470) cg-prop: 	Strategy "replace"
+(00.011472) cg-prop: 	Property "pids.max"
+(00.011494) cg-prop: Parsing controller "devices"
+(00.011496) cg-prop: 	Strategy "replace"
+(00.011502) cg-prop: 	Property "devices.list"
+(00.011554) Preparing image inventory (version 1)
+(00.011607) Add pid ns 1 pid 342720
+(00.011627) Add net ns 2 pid 342720
+(00.011644) Add ipc ns 3 pid 342720
+(00.011660) Add uts ns 4 pid 342720
+(00.011677) Add time ns 5 pid 342720
+(00.011834) Add mnt ns 6 pid 342720
+(00.011857) Add user ns 7 pid 342720
+(00.011906) Add cgroup ns 8 pid 342720
+(00.011912) cg: Dumping cgroups for thread 342720
+(00.012004) cg:  `- New css ID 1
+(00.012009) cg:     `- [] -> [/system.slice/k3s.service] [0]
+(00.012012) cg: Set 1 is criu one
+(00.012056) Detected cgroup V2 freezer
+(00.012061) plugin: `cuda_plugin' hook 10 -> 0x77cf9c523789
+(00.012065) freezing cgroup /sys/fs/cgroup/kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod40c2dce9_a710_41f0_8022_fa44026a0ee5.slice/cri-containerd-b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd.scope: 100 x 100ms attempts, timeout: 10s
+(00.012090) cgroup.freeze=1
+(00.012329) SEIZE 187621 (comm sleep): success
+(00.012985) Seized task 187621, state 1
+(00.012996) seccomp: Collected tid_real 187621 mode 0
+(00.013020) Collected (0 attempts, 0 in_progress)
+(00.013046) Collected (0 attempts, 0 in_progress)
+(00.013053) Collected 187621 in 1 state
+(00.013060) plugin: `cuda_plugin' hook 11 -> 0x77cf9c5234d9
+(00.013196) Will take pid namespace in the image
+(00.013203) Add pid ns 9 pid 187621
+(00.013215) Will take net namespace in the image
+(00.013218) Add net ns 10 pid 187621
+(00.013297) Will take ipc namespace in the image
+(00.013303) Add ipc ns 11 pid 187621
+(00.013378) Will take uts namespace in the image
+(00.013385) Add uts ns 12 pid 187621
+(00.013424) Will take mnt namespace in the image
+(00.013426) Add mnt ns 13 pid 187621
+(00.013449) Will take cgroup namespace in the image
+(00.013452) Add cgroup ns 14 pid 187621
+(00.013454) net: Lock network
+(00.013457) Running network-lock scripts
+(00.013459) 	RPC
+(00.023709) RPC NOTIFY query-ext-files: no `opts` returned.
+(00.024006) 	type overlay source overlay mnt_id 803 s_dev 0x62 / @ ./ flags 0x200000 options lowerdir=/var/lib/rancher/k3s/agent/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/100/fs,upperdir=/var/lib/rancher/k3s/agent/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/101/fs,workdir=/var/lib/rancher/k3s/agent/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/101/work,uuid=on
+(00.024032) 	type proc source proc mnt_id 805 s_dev 0x75 / @ ./proc flags 0x20000e options 
+(00.024039) 	type tmpfs source tmpfs mnt_id 806 s_dev 0x76 / @ ./dev flags 0x1000002 options size=65536k,mode=755
+(00.024046) 	type devpts source devpts mnt_id 807 s_dev 0x77 / @ ./dev/pts flags 0x20000a options gid=5,mode=620,ptmxmode=666
+(00.024069) 	type mqueue source mqueue mnt_id 808 s_dev 0x6a / @ ./dev/mqueue flags 0x20000e options 
+(00.024074) 	type sysfs source sysfs mnt_id 809 s_dev 0x6f / @ ./sys flags 0x20000f options 
+(00.024124) 	type cgroup2 source cgroup mnt_id 810 s_dev 0x17 /kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod40c2dce9_a710_41f0_8022_fa44026a0ee5.slice/cri-containerd-b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd.scope @ ./sys/fs/cgroup flags 0x20000f options 
+(00.024133) 	type ext4 source /dev/sdd mnt_id 811 s_dev 0x800030 /var/lib/kubelet/pods/40c2dce9-a710-41f0-8022-fa44026a0ee5/etc-hosts @ ./etc/hosts flags 0x200000 options discard,errors=remount-ro,data=ordered
+(00.024139) 	type ext4 source /dev/sdd mnt_id 812 s_dev 0x800030 /var/lib/kubelet/pods/40c2dce9-a710-41f0-8022-fa44026a0ee5/containers/test-app/6b21f8a7 @ ./dev/termination-log flags 0x200000 options discard,errors=remount-ro,data=ordered
+(00.024145) 	type ext4 source /dev/sdd mnt_id 813 s_dev 0x800030 /var/lib/rancher/k3s/agent/containerd/io.containerd.grpc.v1.cri/sandboxes/e634ed94aab6e7066e0f4259622dc8d3833352ce0011d35132184f13199f197f/hostname @ ./etc/hostname flags 0x200000 options discard,errors=remount-ro,data=ordered
+(00.024151) 	type ext4 source /dev/sdd mnt_id 814 s_dev 0x800030 /var/lib/rancher/k3s/agent/containerd/io.containerd.grpc.v1.cri/sandboxes/e634ed94aab6e7066e0f4259622dc8d3833352ce0011d35132184f13199f197f/resolv.conf @ ./etc/resolv.conf flags 0x200000 options discard,errors=remount-ro,data=ordered
+(00.024215) 	type tmpfs source shm mnt_id 815 s_dev 0x58 / @ ./dev/shm flags 0x200000 options size=65536k
+(00.024224) 	type tmpfs source tmpfs mnt_id 816 s_dev 0x57 / @ ./run/secrets/kubernetes.io/serviceaccount flags 0x200001 options size=7773384k,noswap
+(00.024268) 	type proc source proc mnt_id 702 s_dev 0x75 /bus @ ./proc/bus flags 0x20000f options 
+(00.024275) 	type proc source proc mnt_id 718 s_dev 0x75 /fs @ ./proc/fs flags 0x20000f options 
+(00.024280) 	type proc source proc mnt_id 719 s_dev 0x75 /irq @ ./proc/irq flags 0x20000f options 
+(00.024292) 	type proc source proc mnt_id 720 s_dev 0x75 /sys @ ./proc/sys flags 0x20000f options 
+(00.024298) 	type proc source proc mnt_id 721 s_dev 0x75 /sysrq-trigger @ ./proc/sysrq-trigger flags 0x20000f options 
+(00.024310) 	type tmpfs source tmpfs mnt_id 722 s_dev 0x78 / @ ./proc/acpi flags 0x200001 options 
+(00.024318) 	type tmpfs source tmpfs mnt_id 723 s_dev 0x76 /null @ ./proc/interrupts flags 0x1000002 options size=65536k,mode=755
+(00.024324) 	type tmpfs source tmpfs mnt_id 724 s_dev 0x76 /null @ ./proc/kcore flags 0x1000002 options size=65536k,mode=755
+(00.024329) 	type tmpfs source tmpfs mnt_id 725 s_dev 0x76 /null @ ./proc/keys flags 0x1000002 options size=65536k,mode=755
+(00.024335) 	type tmpfs source tmpfs mnt_id 726 s_dev 0x76 /null @ ./proc/latency_stats flags 0x1000002 options size=65536k,mode=755
+(00.024340) 	type tmpfs source tmpfs mnt_id 727 s_dev 0x76 /null @ ./proc/timer_list flags 0x1000002 options size=65536k,mode=755
+(00.024345) 	type tmpfs source tmpfs mnt_id 728 s_dev 0x79 / @ ./proc/scsi flags 0x200001 options 
+(00.024349) 	type tmpfs source tmpfs mnt_id 729 s_dev 0x7a / @ ./sys/firmware flags 0x200001 options 
+(00.024374) mnt: Building mountpoints tree
+(00.024378) mnt: 	Building plain mount tree
+(00.024380) mnt: 		Working on 729->809
+(00.024383) mnt: 		Working on 728->805
+(00.024385) mnt: 		Working on 727->805
+(00.024387) mnt: 		Working on 726->805
+(00.024390) mnt: 		Working on 725->805
+(00.024392) mnt: 		Working on 724->805
+(00.024394) mnt: 		Working on 723->805
+(00.024396) mnt: 		Working on 722->805
+(00.024398) mnt: 		Working on 721->805
+(00.024401) mnt: 		Working on 720->805
+(00.024403) mnt: 		Working on 719->805
+(00.024405) mnt: 		Working on 718->805
+(00.024407) mnt: 		Working on 702->805
+(00.024409) mnt: 		Working on 816->803
+(00.024412) mnt: 		Working on 815->806
+(00.024414) mnt: 		Working on 814->803
+(00.024416) mnt: 		Working on 813->803
+(00.024418) mnt: 		Working on 812->806
+(00.024420) mnt: 		Working on 811->803
+(00.024422) mnt: 		Working on 810->809
+(00.024425) mnt: 		Working on 809->803
+(00.024427) mnt: 		Working on 808->806
+(00.024429) mnt: 		Working on 807->806
+(00.024431) mnt: 		Working on 806->803
+(00.024434) mnt: 		Working on 805->803
+(00.024436) mnt: 		Working on 803->688
+(00.024438) mnt: 	Resorting children of 803 in mount order
+(00.024442) mnt: 	Resorting children of 816 in mount order
+(00.024444) mnt: 	Resorting children of 814 in mount order
+(00.024446) mnt: 	Resorting children of 813 in mount order
+(00.024448) mnt: 	Resorting children of 811 in mount order
+(00.024450) mnt: 	Resorting children of 809 in mount order
+(00.024452) mnt: 	Resorting children of 810 in mount order
+(00.024454) mnt: 	Resorting children of 729 in mount order
+(00.024457) mnt: 	Resorting children of 806 in mount order
+(00.024459) mnt: 	Resorting children of 815 in mount order
+(00.024461) mnt: 	Resorting children of 812 in mount order
+(00.024463) mnt: 	Resorting children of 808 in mount order
+(00.024489) mnt: 	Resorting children of 807 in mount order
+(00.024494) mnt: 	Resorting children of 805 in mount order
+(00.024499) mnt: 	Resorting children of 728 in mount order
+(00.024501) mnt: 	Resorting children of 727 in mount order
+(00.024503) mnt: 	Resorting children of 726 in mount order
+(00.024505) mnt: 	Resorting children of 725 in mount order
+(00.024519) mnt: 	Resorting children of 724 in mount order
+(00.024522) mnt: 	Resorting children of 723 in mount order
+(00.024524) mnt: 	Resorting children of 722 in mount order
+(00.024526) mnt: 	Resorting children of 721 in mount order
+(00.024529) mnt: 	Resorting children of 720 in mount order
+(00.024531) mnt: 	Resorting children of 719 in mount order
+(00.024533) mnt: 	Resorting children of 718 in mount order
+(00.024535) mnt: 	Resorting children of 702 in mount order
+(00.024537) mnt: Done:
+(00.024539) mnt: [./](803->688)
+(00.024542) mnt:  [./run/secrets/kubernetes.io/serviceaccount](816->803)
+(00.024544) mnt:  <--
+(00.024546) mnt:  [./etc/resolv.conf](814->803)
+(00.024548) mnt:  <--
+(00.024551) mnt:  [./etc/hostname](813->803)
+(00.024553) mnt:  <--
+(00.024555) mnt:  [./etc/hosts](811->803)
+(00.024557) mnt:  <--
+(00.024559) mnt:  [./sys](809->803)
+(00.024561) mnt:   [./sys/fs/cgroup](810->809)
+(00.024564) mnt:   <--
+(00.024566) mnt:   [./sys/firmware](729->809)
+(00.024568) mnt:   <--
+(00.024570) mnt:  <--
+(00.024572) mnt:  [./dev](806->803)
+(00.024575) mnt:   [./dev/shm](815->806)
+(00.024577) mnt:   <--
+(00.024579) mnt:   [./dev/termination-log](812->806)
+(00.024581) mnt:   <--
+(00.024583) mnt:   [./dev/mqueue](808->806)
+(00.024586) mnt:   <--
+(00.024588) mnt:   [./dev/pts](807->806)
+(00.024590) mnt:   <--
+(00.024592) mnt:  <--
+(00.024594) mnt:  [./proc](805->803)
+(00.024596) mnt:   [./proc/scsi](728->805)
+(00.024598) mnt:   <--
+(00.024600) mnt:   [./proc/timer_list](727->805)
+(00.024602) mnt:   <--
+(00.024604) mnt:   [./proc/latency_stats](726->805)
+(00.024606) mnt:   <--
+(00.024609) mnt:   [./proc/keys](725->805)
+(00.024611) mnt:   <--
+(00.024613) mnt:   [./proc/kcore](724->805)
+(00.024616) mnt:   <--
+(00.024618) mnt:   [./proc/interrupts](723->805)
+(00.024620) mnt:   <--
+(00.024622) mnt:   [./proc/acpi](722->805)
+(00.024624) mnt:   <--
+(00.024626) mnt:   [./proc/sysrq-trigger](721->805)
+(00.024629) mnt:   <--
+(00.024631) mnt:   [./proc/sys](720->805)
+(00.024633) mnt:   <--
+(00.024635) mnt:   [./proc/irq](719->805)
+(00.024637) mnt:   <--
+(00.024639) mnt:   [./proc/fs](718->805)
+(00.024641) mnt:   <--
+(00.024643) mnt:   [./proc/bus](702->805)
+(00.024646) mnt:   <--
+(00.024648) mnt:  <--
+(00.024650) mnt: <--
+(00.024666) mnt: 	The mount 726 is bind for 727 (@./proc/latency_stats -> @./proc/timer_list)
+(00.024670) mnt: 	The mount 725 is bind for 727 (@./proc/keys -> @./proc/timer_list)
+(00.024673) mnt: 	The mount 724 is bind for 727 (@./proc/kcore -> @./proc/timer_list)
+(00.024675) mnt: 	The mount 723 is bind for 727 (@./proc/interrupts -> @./proc/timer_list)
+(00.024677) mnt: 	The mount 806 is bind for 727 (@./dev -> @./proc/timer_list)
+(00.024679) mnt: 	The mount 720 is bind for 721 (@./proc/sys -> @./proc/sysrq-trigger)
+(00.024682) mnt: 	The mount 719 is bind for 721 (@./proc/irq -> @./proc/sysrq-trigger)
+(00.024684) mnt: 	The mount 718 is bind for 721 (@./proc/fs -> @./proc/sysrq-trigger)
+(00.024686) mnt: 	The mount 702 is bind for 721 (@./proc/bus -> @./proc/sysrq-trigger)
+(00.024688) mnt: 	The mount 805 is bind for 721 (@./proc -> @./proc/sysrq-trigger)
+(00.024691) mnt: 	The mount 813 is bind for 814 (@./etc/hostname -> @./etc/resolv.conf)
+(00.024693) mnt: 	The mount 812 is bind for 814 (@./dev/termination-log -> @./etc/resolv.conf)
+(00.024695) mnt: 	The mount 811 is bind for 814 (@./etc/hosts -> @./etc/resolv.conf)
+(00.024700) mnt: Found /dev/null mapping for ./proc/timer_list mountpoint
+(00.024703) mnt: Found /dev/null mapping for ./proc/latency_stats mountpoint
+(00.024705) mnt: Found /dev/null mapping for ./proc/keys mountpoint
+(00.024708) mnt: Found /dev/null mapping for ./proc/kcore mountpoint
+(00.024710) mnt: Found /dev/null mapping for ./proc/interrupts mountpoint
+(00.024715) mnt: Found /run/secrets/kubernetes.io/serviceaccount mapping for ./run/secrets/kubernetes.io/serviceaccount mountpoint
+(00.024717) mnt: Found /dev/shm mapping for ./dev/shm mountpoint
+(00.024720) mnt: Found /etc/resolv.conf mapping for ./etc/resolv.conf mountpoint
+(00.024723) mnt: Found /etc/hostname mapping for ./etc/hostname mountpoint
+(00.024736) mnt: Found /dev/termination-log mapping for ./dev/termination-log mountpoint
+(00.024739) mnt: Found /etc/hosts mapping for ./etc/hosts mountpoint
+(00.024744) mnt: Inspecting sharing on 729 shared_id 0 master_id 0 (@./sys/firmware)
+(00.024747) mnt: Inspecting sharing on 728 shared_id 0 master_id 0 (@./proc/scsi)
+(00.024749) mnt: Inspecting sharing on 727 shared_id 0 master_id 0 (@./proc/timer_list)
+(00.024752) mnt: Inspecting sharing on 726 shared_id 0 master_id 0 (@./proc/latency_stats)
+(00.024755) mnt: Inspecting sharing on 725 shared_id 0 master_id 0 (@./proc/keys)
+(00.024757) mnt: Inspecting sharing on 724 shared_id 0 master_id 0 (@./proc/kcore)
+(00.024759) mnt: Inspecting sharing on 723 shared_id 0 master_id 0 (@./proc/interrupts)
+(00.024762) mnt: Inspecting sharing on 722 shared_id 0 master_id 0 (@./proc/acpi)
+(00.024764) mnt: Inspecting sharing on 721 shared_id 0 master_id 0 (@./proc/sysrq-trigger)
+(00.024766) mnt: Inspecting sharing on 720 shared_id 0 master_id 0 (@./proc/sys)
+(00.024769) mnt: Inspecting sharing on 719 shared_id 0 master_id 0 (@./proc/irq)
+(00.024771) mnt: Inspecting sharing on 718 shared_id 0 master_id 0 (@./proc/fs)
+(00.024773) mnt: Inspecting sharing on 702 shared_id 0 master_id 0 (@./proc/bus)
+(00.024776) mnt: Inspecting sharing on 816 shared_id 0 master_id 0 (@./run/secrets/kubernetes.io/serviceaccount)
+(00.024778) mnt: Inspecting sharing on 815 shared_id 0 master_id 0 (@./dev/shm)
+(00.024780) mnt: Inspecting sharing on 814 shared_id 0 master_id 0 (@./etc/resolv.conf)
+(00.024782) mnt: Inspecting sharing on 813 shared_id 0 master_id 0 (@./etc/hostname)
+(00.024785) mnt: Inspecting sharing on 812 shared_id 0 master_id 0 (@./dev/termination-log)
+(00.024787) mnt: Inspecting sharing on 811 shared_id 0 master_id 0 (@./etc/hosts)
+(00.024789) mnt: Inspecting sharing on 810 shared_id 0 master_id 0 (@./sys/fs/cgroup)
+(00.024792) mnt: Inspecting sharing on 809 shared_id 0 master_id 0 (@./sys)
+(00.024794) mnt: Inspecting sharing on 808 shared_id 0 master_id 0 (@./dev/mqueue)
+(00.024796) mnt: Inspecting sharing on 807 shared_id 0 master_id 0 (@./dev/pts)
+(00.024799) mnt: Inspecting sharing on 806 shared_id 0 master_id 0 (@./dev)
+(00.024801) mnt: Inspecting sharing on 805 shared_id 0 master_id 0 (@./proc)
+(00.024804) mnt: Inspecting sharing on 803 shared_id 0 master_id 0 (@./)
+(00.024811) net: Collecting netns 10/187621
+(00.024814) net: The net[4026532238] netns is external
+(00.024816) net: Switching to 187621's net for collecting sockets
+(00.025334) unix: 	Collected: ino 1805514 peer_ino 0 family    1 type    5 state  7 name null
+(00.029508) sockets: Sockets collect procedure family AF_INET proto IPPROTO_RAW: -2
+(00.032955) sockets: Sockets collect procedure family AF_INET6 proto IPPROTO_RAW: -2
+(00.034627) netlink: Collect netlink sock 0x107871
+(00.034666) netlink: Collect netlink sock 0x1b8cc9
+(00.034669) netlink: Collect netlink sock 0x107877
+(00.034671) netlink: Collect netlink sock 0x10787d
+(00.034673) netlink: Collect netlink sock 0x107873
+(00.034674) netlink: Collect netlink sock 0x107875
+(00.034676) netlink: Collect netlink sock 0x107878
+(00.034678) netlink: Collect netlink sock 0x107874
+(00.034680) netlink: Collect netlink sock 0x107872
+(00.034699) Collecting pidns 9/187621
+(00.034797) No parent images directory provided
+(00.034802) ========================================
+(00.034827) Dumping task (pid: 187621 comm: sleep)
+(00.034829) ========================================
+(00.034830) Obtaining task stat ... 
+(00.034890) 
+(00.034895) Collecting mappings (pid: 187621)
+(00.034897) ----------------------------------------
+(00.035182) Handling VMA with the following smaps entry: 58e9a87c7000-58e9a87c9000 r--p 00000000 08:30 792458                     /usr/bin/sleep
+(00.035227) Found regular file mapping, OK
+(00.035309) Dumping path for -3 fd via self 14 [/usr/bin/sleep]
+(00.035582) Handling VMA with the following smaps entry: 58e9a87c9000-58e9a87cd000 r-xp 00002000 08:30 792458                     /usr/bin/sleep
+(00.035595) vma 58e9a87c9000 borrows vfi from previous 58e9a87c7000
+(00.035612) Handling VMA with the following smaps entry: 58e9a87cd000-58e9a87ce000 r--p 00006000 08:30 792458                     /usr/bin/sleep
+(00.035618) vma 58e9a87cd000 borrows vfi from previous 58e9a87c9000
+(00.035622) Handling VMA with the following smaps entry: 58e9a87ce000-58e9a87cf000 r--p 00007000 08:30 792458                     /usr/bin/sleep
+(00.035627) vma 58e9a87ce000 borrows vfi from previous 58e9a87cd000
+(00.035630) Handling VMA with the following smaps entry: 58e9a87cf000-58e9a87d0000 rw-p 00008000 08:30 792458                     /usr/bin/sleep
+(00.035636) vma 58e9a87cf000 borrows vfi from previous 58e9a87ce000
+(00.035639) Handling VMA with the following smaps entry: 58e9b5da9000-58e9b5dca000 rw-p 00000000 00:00 0                          [heap]
+(00.035845) Handling VMA with the following smaps entry: 74082b83f000-74082b842000 rw-p 00000000 00:00 0 
+(00.035861) Handling VMA with the following smaps entry: 74082b842000-74082b86a000 r--p 00000000 08:30 793262                     /usr/lib/x86_64-linux-gnu/libc.so.6
+(00.035878) Found regular file mapping, OK
+(00.035919) Dumping path for -3 fd via self 14 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+(00.036140) Handling VMA with the following smaps entry: 74082b86a000-74082b9f2000 r-xp 00028000 08:30 793262                     /usr/lib/x86_64-linux-gnu/libc.so.6
+(00.036152) vma 74082b86a000 borrows vfi from previous 74082b842000
+(00.036156) Handling VMA with the following smaps entry: 74082b9f2000-74082ba41000 r--p 001b0000 08:30 793262                     /usr/lib/x86_64-linux-gnu/libc.so.6
+(00.036161) vma 74082b9f2000 borrows vfi from previous 74082b86a000
+(00.036164) Handling VMA with the following smaps entry: 74082ba41000-74082ba45000 r--p 001fe000 08:30 793262                     /usr/lib/x86_64-linux-gnu/libc.so.6
+(00.036168) vma 74082ba41000 borrows vfi from previous 74082b9f2000
+(00.036201) Handling VMA with the following smaps entry: 74082ba45000-74082ba47000 rw-p 00202000 08:30 793262                     /usr/lib/x86_64-linux-gnu/libc.so.6
+(00.036206) vma 74082ba45000 borrows vfi from previous 74082ba41000
+(00.036209) Handling VMA with the following smaps entry: 74082ba47000-74082ba54000 rw-p 00000000 00:00 0 
+(00.036227) Handling VMA with the following smaps entry: 74082ba56000-74082ba58000 rw-p 00000000 00:00 0 
+(00.036234) Handling VMA with the following smaps entry: 74082ba58000-74082ba59000 r--p 00000000 08:30 793225                     /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+(00.036246) Found regular file mapping, OK
+(00.036274) Dumping path for -3 fd via self 14 [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+(00.036361) Handling VMA with the following smaps entry: 74082ba59000-74082ba84000 r-xp 00001000 08:30 793225                     /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+(00.036394) vma 74082ba59000 borrows vfi from previous 74082ba58000
+(00.036536) Handling VMA with the following smaps entry: 74082ba84000-74082ba8e000 r--p 0002c000 08:30 793225                     /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+(00.036548) vma 74082ba84000 borrows vfi from previous 74082ba59000
+(00.036552) Handling VMA with the following smaps entry: 74082ba8e000-74082ba90000 r--p 00036000 08:30 793225                     /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+(00.036558) vma 74082ba8e000 borrows vfi from previous 74082ba84000
+(00.036561) Handling VMA with the following smaps entry: 74082ba90000-74082ba92000 rw-p 00038000 08:30 793225                     /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+(00.036591) vma 74082ba90000 borrows vfi from previous 74082ba8e000
+(00.036600) Handling VMA with the following smaps entry: 7ffe4ebb8000-7ffe4ebd9000 rw-p 00000000 00:00 0                          [stack]
+(00.036621) Handling VMA with the following smaps entry: 7ffe4ebf7000-7ffe4ebfb000 r--p 00000000 00:00 0                          [vvar]
+(00.036628) Handling VMA with the following smaps entry: 7ffe4ebfb000-7ffe4ebfd000 r-xp 00000000 00:00 0                          [vdso]
+(00.036645) Collected, longest area occupies 392 pages
+(00.036659) 0x58e9a87c7000-0x58e9a87c9000 (8K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0 reg fp  shmid: 0x1
+(00.036662) 0x58e9a87c9000-0x58e9a87cd000 (16K) prot 0x5 flags 0x2 fdflags 0 st 0x41 off 0x2000 reg fp  shmid: 0x1
+(00.036664) 0x58e9a87cd000-0x58e9a87ce000 (4K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x6000 reg fp  shmid: 0x1
+(00.036666) 0x58e9a87ce000-0x58e9a87cf000 (4K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x7000 reg fp  shmid: 0x1
+(00.036668) 0x58e9a87cf000-0x58e9a87d0000 (4K) prot 0x3 flags 0x2 fdflags 0 st 0x41 off 0x8000 reg fp  shmid: 0x1
+(00.036670) 0x58e9b5da9000-0x58e9b5dca000 (132K) prot 0x3 flags 0x22 fdflags 0 st 0x221 off 0 reg heap ap  shmid: 0
+(00.036672) 0x74082b83f000-0x74082b842000 (12K) prot 0x3 flags 0x22 fdflags 0 st 0x201 off 0 reg ap  shmid: 0
+(00.036673) 0x74082b842000-0x74082b86a000 (160K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0 reg fp  shmid: 0x2
+(00.036675) 0x74082b86a000-0x74082b9f2000 (1568K) prot 0x5 flags 0x2 fdflags 0 st 0x41 off 0x28000 reg fp  shmid: 0x2
+(00.036677) 0x74082b9f2000-0x74082ba41000 (316K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x1b0000 reg fp  shmid: 0x2
+(00.036679) 0x74082ba41000-0x74082ba45000 (16K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x1fe000 reg fp  shmid: 0x2
+(00.036681) 0x74082ba45000-0x74082ba47000 (8K) prot 0x3 flags 0x2 fdflags 0 st 0x41 off 0x202000 reg fp  shmid: 0x2
+(00.036682) 0x74082ba47000-0x74082ba54000 (52K) prot 0x3 flags 0x22 fdflags 0 st 0x201 off 0 reg ap  shmid: 0
+(00.036684) 0x74082ba56000-0x74082ba58000 (8K) prot 0x3 flags 0x22 fdflags 0 st 0x201 off 0 reg ap  shmid: 0
+(00.036686) 0x74082ba58000-0x74082ba59000 (4K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0 reg fp  shmid: 0x3
+(00.036688) 0x74082ba59000-0x74082ba84000 (172K) prot 0x5 flags 0x2 fdflags 0 st 0x41 off 0x1000 reg fp  shmid: 0x3
+(00.036689) 0x74082ba84000-0x74082ba8e000 (40K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x2c000 reg fp  shmid: 0x3
+(00.036691) 0x74082ba8e000-0x74082ba90000 (8K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x36000 reg fp  shmid: 0x3
+(00.036693) 0x74082ba90000-0x74082ba92000 (8K) prot 0x3 flags 0x2 fdflags 0 st 0x41 off 0x38000 reg fp  shmid: 0x3
+(00.036695) 0x7ffe4ebb8000-0x7ffe4ebd9000 (132K) prot 0x3 flags 0x122 fdflags 0 st 0x201 off 0 reg ap  shmid: 0
+(00.036697) 0x7ffe4ebf7000-0x7ffe4ebfb000 (16K) prot 0x1 flags 0x22 fdflags 0 st 0x1201 off 0 reg vvar ap  shmid: 0
+(00.036699) 0x7ffe4ebfb000-0x7ffe4ebfd000 (8K) prot 0x5 flags 0x22 fdflags 0 st 0x209 off 0 reg vdso ap  shmid: 0
+(00.036701) ----------------------------------------
+(00.036703) 
+(00.036704) Collecting fds (pid: 187621)
+(00.036706) ----------------------------------------
+(00.036732) Found 3 file descriptors
+(00.036734) ----------------------------------------
+(00.036749) Dump private signals of 187621
+(00.036757) Dump shared signals of 187621
+(00.036763) Dump rseq of 187621: ptr = 0x74082b840060 sign = 0x53053053
+(00.037021) Parasite syscall_ip at 0x58e9a87c9000
+(00.038590) Set up parasite blob using memfd
+(00.038799) Putting parasite blob into 0x77cf9c4ff000->0x74082b82d000
+(00.039303) Dumping general registers for 187621 in native mode
+(00.039314) Dumping GP/FPU registers for 187621
+(00.039355) x86: xsave runtime structure
+(00.039358) x86: -----------------------
+(00.039361) x86: cwd:0x37f swd:0 twd:0 fop:0 mxcsr:0x1f80 mxcsr_mask:0x2ffff
+(00.039365) x86: magic1:0x46505853 extended_size:580 xstate_bv:0x3 xstate_size:576
+(00.039370) x86: xstate_bv: 0x3
+(00.039375) x86: -----------------------
+(00.039378) Putting tsock into pid 187621
+(00.039662) Wait for parasite being daemonized...
+(00.039670) Wait for ack 2 on daemon socket
+pie: 1: Running daemon thread leader
+pie: 1: __sent ack msg: 2 2 0
+pie: 1: Daemon waits for command
+(00.039766) Fetched ack: 2 2 0
+(00.039771) Parasite 187621 has been switched to daemon mode
+(00.039903) Sent msg to daemon 72 0 0
+pie: 1: __fetched msg: 72 0 0
+pie: 1: __sent ack msg: 72 72 0
+pie: 1: Daemon waits for command
+(00.040041) Wait for ack 72 on daemon socket
+(00.040052) Fetched ack: 72 72 0
+(00.040056) vdso: vDSO hint is reliable - omit checking
+(00.040110) Sent msg to daemon 74 0 0
+(00.040116) Wait for ack 74 on daemon socket
+pie: 1: __fetched msg: 74 0 0
+pie: 1: __sent ack msg: 74 74 0
+pie: 1: Daemon waits for command
+(00.040352) Fetched ack: 74 74 0
+(00.040378) Sent msg to daemon 70 0 0
+(00.040382) Wait for ack 70 on daemon socket
+pie: 1: __fetched msg: 70 0 0
+pie: 1: __sent ack msg: 70 70 0
+pie: 1: Daemon waits for command
+(00.040442) Fetched ack: 70 70 0
+(00.040447) sid=1 pgid=1 pid=1
+(00.040536) 
+(00.040542) Dumping opened files (pid: 187621)
+(00.040545) ----------------------------------------
+(00.040588) Sent msg to daemon 71 0 0
+pie: 1: __fetched msg: 71 0 0
+pie: 1: __sent ack msg: 71 71 0
+pie: 1: Daemon waits for command
+(00.040798) Wait for ack 71 on daemon socket
+(00.040810) Fetched ack: 71 71 0
+(00.040861) 187621 fdinfo 0: pos:                0 flags:           100002/0
+(00.040894) Dumping path for 0 fd via self 18 [/dev/null]
+(00.040969) 187621 fdinfo 1: pos:                0 flags:                1/0
+(00.040974) Dumping pipe 19 with id 0x5 pipe_id 0x1071bf
+(00.040992) 187621 fdinfo 2: pos:                0 flags:                1/0
+(00.040995) Dumping pipe 20 with id 0x6 pipe_id 0x1071c0
+(00.040999) ----------------------------------------
+(00.041085) Sent msg to daemon 65 0 0
+(00.041091) Wait for ack 65 on daemon socket
+pie: 1: __fetched msg: 65 0 0
+pie: 1: __sent ack msg: 65 65 0
+pie: 1: Daemon waits for command
+(00.041274) Fetched ack: 65 65 0
+(00.041281) 
+(00.041283) Dumping pages (type: 59 pid: 187621)
+(00.041285) ----------------------------------------
+(00.041287)    Private vmas 392/674 pages
+(00.041306) pagemap-cache: created for pid 187621 (takes 4096 bytes)
+(00.041309) page-pipe: Create page pipe for 674 segs
+(00.041312) page-pipe: Will grow page pipe (iov off is 0)
+(00.041408) No parent images directory provided
+(00.041412) pagemap-cache: 187621: filling VMA 58e9a87c7000-58e9a87c9000 (8K) [l:58e9a8600000 h:58e9a8800000]
+(00.041420) Pagemap generated: 0 pages (0 lazy) 0 holes
+(00.041422) pagemap-cache: 187621: filling VMA 58e9a87c9000-58e9a87cd000 (16K) [l:58e9a8600000 h:58e9a8800000]
+(00.041426) page-pipe: Add iov to page pipe (0 iovs, 0/674 total)
+(00.041428) Pagemap generated: 1 pages (0 lazy) 0 holes
+(00.041430) pagemap-cache: 187621: filling VMA 58e9a87cd000-58e9a87ce000 (4K) [l:58e9a8600000 h:58e9a8800000]
+(00.041434) Pagemap generated: 0 pages (0 lazy) 0 holes
+(00.041436) pagemap-cache: 187621: filling VMA 58e9a87ce000-58e9a87cf000 (4K) [l:58e9a8600000 h:58e9a8800000]
+(00.041439) page-pipe: Add iov to page pipe (1 iovs, 1/674 total)
+(00.041441) Pagemap generated: 1 pages (0 lazy) 0 holes
+(00.041443) pagemap-cache: 187621: filling VMA 58e9a87cf000-58e9a87d0000 (4K) [l:58e9a8600000 h:58e9a8800000]
+(00.041447) Pagemap generated: 1 pages (0 lazy) 0 holes
+(00.041449) pagemap-cache: 187621: filling VMA 58e9b5da9000-58e9b5dca000 (132K) [l:58e9b5c00000 h:58e9b5e00000]
+(00.041453) page-pipe: Will grow page pipe (iov off is 2)
+(00.041461) page-pipe: Add iov to page pipe (0 iovs, 2/674 total)
+(00.041463) Pagemap generated: 1 pages (0 lazy) 0 holes
+(00.041465) pagemap-cache: 187621: filling VMA 74082b83f000-74082b842000 (12K) [l:74082b800000 h:74082ba00000]
+(00.041467) pagemap-cache: 	187621:     74082b83f000-74082b842000     nr:1     cov:12288
+(00.041470) pagemap-cache: 	187621:     74082b842000-74082b86a000     nr:2     cov:176128
+(00.041472) pagemap-cache: 	187621:     74082b86a000-74082b9f2000     nr:3     cov:1781760
+(00.041474) pagemap-cache: 	187621: cache  mode [l:74082b83f000 h:74082ba00000]
+(00.041488) page-pipe: Add iov to page pipe (1 iovs, 3/674 total)
+(00.041490) Pagemap generated: 2 pages (0 lazy) 0 holes
+(00.041492) Pagemap generated: 0 pages (0 lazy) 0 holes
+(00.041496) Pagemap generated: 0 pages (0 lazy) 0 holes
+(00.041497) pagemap-cache: 187621: filling VMA 74082b9f2000-74082ba41000 (316K) [l:74082b800000 h:74082ba00000]
+(00.041503) Pagemap generated: 0 pages (0 lazy) 0 holes
+(00.041505) pagemap-cache: 187621: filling VMA 74082ba41000-74082ba45000 (16K) [l:74082ba00000 h:74082bc00000]
+(00.041507) pagemap-cache: 	187621:     74082ba41000-74082ba45000     nr:1     cov:16384
+(00.041516) pagemap-cache: 	187621:     74082ba45000-74082ba47000     nr:2     cov:24576
+(00.041518) pagemap-cache: 	187621:     74082ba47000-74082ba54000     nr:3     cov:77824
+(00.041519) pagemap-cache: 	187621:     74082ba56000-74082ba58000     nr:4     cov:86016
+(00.041521) pagemap-cache: 	187621:     74082ba58000-74082ba59000     nr:5     cov:90112
+(00.041523) pagemap-cache: 	187621:     74082ba59000-74082ba84000     nr:6     cov:266240
+(00.041525) pagemap-cache: 	187621:     74082ba84000-74082ba8e000     nr:7     cov:307200
+(00.041527) pagemap-cache: 	187621:     74082ba8e000-74082ba90000     nr:8     cov:315392
+(00.041529) pagemap-cache: 	187621:     74082ba90000-74082ba92000     nr:9     cov:323584
+(00.041531) pagemap-cache: 	187621: cache  mode [l:74082ba41000 h:74082bc00000]
+(00.041540) page-pipe: Will grow page pipe (iov off is 4)
+(00.041549) page-pipe: Add iov to page pipe (0 iovs, 4/674 total)
+(00.041551) Pagemap generated: 4 pages (0 lazy) 0 holes
+(00.041553) Pagemap generated: 2 pages (0 lazy) 0 holes
+(00.041555) page-pipe: Will grow page pipe (iov off is 5)
+(00.041562) page-pipe: Add iov to page pipe (0 iovs, 5/674 total)
+(00.041564) page-pipe: Add iov to page pipe (1 iovs, 6/674 total)
+(00.041566) page-pipe: Add iov to page pipe (2 iovs, 7/674 total)
+(00.041568) Pagemap generated: 5 pages (0 lazy) 0 holes
+(00.041570) page-pipe: Add iov to page pipe (3 iovs, 8/674 total)
+(00.041571) Pagemap generated: 1 pages (0 lazy) 0 holes
+(00.041573) Pagemap generated: 0 pages (0 lazy) 0 holes
+(00.041575) Pagemap generated: 0 pages (0 lazy) 0 holes
+(00.041577) Pagemap generated: 0 pages (0 lazy) 0 holes
+(00.041579) page-pipe: Will grow page pipe (iov off is 9)
+(00.041586) page-pipe: Add iov to page pipe (0 iovs, 9/674 total)
+(00.041588) Pagemap generated: 2 pages (0 lazy) 0 holes
+(00.041590) Pagemap generated: 2 pages (0 lazy) 0 holes
+(00.041592) pagemap-cache: 187621: filling VMA 7ffe4ebb8000-7ffe4ebd9000 (132K) [l:7ffe4ea00000 h:7ffe4ec00000]
+(00.041596) page-pipe: Will grow page pipe (iov off is 10)
+(00.041604) page-pipe: Add iov to page pipe (0 iovs, 10/674 total)
+(00.041606) page-pipe: Add iov to page pipe (1 iovs, 11/674 total)
+(00.041608) Pagemap generated: 3 pages (0 lazy) 0 holes
+(00.041610) pagemap-cache: 187621: filling VMA 7ffe4ebfb000-7ffe4ebfd000 (8K) [l:7ffe4ea00000 h:7ffe4ec00000]
+(00.041614) page-pipe: Will grow page pipe (iov off is 12)
+(00.041621) page-pipe: Add iov to page pipe (0 iovs, 12/674 total)
+(00.041623) Pagemap generated: 2 pages (0 lazy) 0 holes
+(00.041625) page-pipe: Page pipe:
+(00.041627) page-pipe: * 7 pipes 13/674 iovs:
+(00.041629) page-pipe: 	buf 3 pages, 2 iovs, flags: 0 pipe_off: 0 :
+(00.041631) page-pipe: 		0x58e9a87c9000 - 0x58e9a87ca000
+(00.041633) page-pipe: 		0x58e9a87ce000 - 0x58e9a87d0000
+(00.041634) page-pipe: 	buf 3 pages, 2 iovs, flags: 1 pipe_off: 0 :
+(00.041636) page-pipe: 		0x58e9b5da9000 - 0x58e9b5daa000
+(00.041638) page-pipe: 		0x74082b83f000 - 0x74082b841000
+(00.041640) page-pipe: 	buf 6 pages, 1 iovs, flags: 0 pipe_off: 0 :
+(00.041641) page-pipe: 		0x74082ba41000 - 0x74082ba47000
+(00.041643) page-pipe: 	buf 6 pages, 4 iovs, flags: 1 pipe_off: 0 :
+(00.041645) page-pipe: 		0x74082ba47000 - 0x74082ba48000
+(00.041647) page-pipe: 		0x74082ba4b000 - 0x74082ba4e000
+(00.041648) page-pipe: 		0x74082ba53000 - 0x74082ba54000
+(00.041650) page-pipe: 		0x74082ba56000 - 0x74082ba57000
+(00.041652) page-pipe: 	buf 4 pages, 1 iovs, flags: 0 pipe_off: 0 :
+(00.041653) page-pipe: 		0x74082ba8e000 - 0x74082ba92000
+(00.041655) page-pipe: 	buf 3 pages, 2 iovs, flags: 1 pipe_off: 0 :
+(00.041657) page-pipe: 		0x7ffe4ebd5000 - 0x7ffe4ebd7000
+(00.041659) page-pipe: 		0x7ffe4ebd8000 - 0x7ffe4ebd9000
+(00.041660) page-pipe: 	buf 2 pages, 1 iovs, flags: 0 pipe_off: 0 :
+(00.041662) page-pipe: 		0x7ffe4ebfb000 - 0x7ffe4ebfd000
+(00.041664) page-pipe: * 0 holes:
+(00.041665) PPB: 3 pages 2 segs 16 pipe 0 off
+(00.041697) Sent msg to daemon 66 0 0
+(00.041710) Wait for ack 66 on daemon socket
+pie: 1: __fetched msg: 66 0 0
+pie: 1: __sent ack msg: 66 66 0
+(00.041900) Fetched ack: 66 66 0
+pie: 1: Daemon waits for command
+(00.041917) PPB: 3 pages 2 segs 16 pipe 2 off
+(00.041948) Sent msg to daemon 66 0 0
+(00.041959) Wait for ack 66 on daemon socket
+pie: 1: __fetched msg: 66 0 0
+pie: 1: __sent ack msg: 66 66 0
+pie: 1: Daemon waits for command
+(00.042035) Fetched ack: 66 66 0
+(00.042040) PPB: 6 pages 1 segs 16 pipe 4 off
+(00.042069) Sent msg to daemon 66 0 0
+(00.042079) Wait for ack 66 on daemon socket
+pie: 1: __fetched msg: 66 0 0
+pie: 1: __sent ack msg: 66 66 0
+pie: 1: Daemon waits for command
+(00.042156) Fetched ack: 66 66 0
+(00.042162) PPB: 6 pages 4 segs 16 pipe 5 off
+(00.042189) Sent msg to daemon 66 0 0
+(00.042200) Wait for ack 66 on daemon socket
+pie: 1: __fetched msg: 66 0 0
+pie: 1: __sent ack msg: 66 66 0
+pie: 1: Daemon waits for command
+(00.042284) Fetched ack: 66 66 0
+(00.042291) PPB: 4 pages 1 segs 16 pipe 9 off
+(00.042323) Sent msg to daemon 66 0 0
+(00.042376) Wait for ack 66 on daemon socket
+pie: 1: __fetched msg: 66 0 0
+pie: 1: __sent ack msg: 66 66 0
+pie: 1: Daemon waits for command
+(00.042464) Fetched ack: 66 66 0
+(00.042471) PPB: 3 pages 2 segs 16 pipe 10 off
+(00.042506) Sent msg to daemon 66 0 0
+(00.042522) Wait for ack 66 on daemon socket
+pie: 1: __fetched msg: 66 0 0
+pie: 1: __sent ack msg: 66 66 0
+pie: 1: Daemon waits for command
+(00.042647) Fetched ack: 66 66 0
+(00.042661) PPB: 2 pages 1 segs 16 pipe 12 off
+(00.042690) Sent msg to daemon 66 0 0
+(00.042701) Wait for ack 66 on daemon socket
+pie: 1: __fetched msg: 66 0 0
+pie: 1: __sent ack msg: 66 66 0
+pie: 1: Daemon waits for command
+(00.042782) Fetched ack: 66 66 0
+(00.042788) page-xfer: Transferring pages:
+(00.042790) page-xfer: 	buf 3/2
+(00.042792) page-xfer: 	p 0x58e9a87c9000 - 0x58e9a87ca000
+(00.042817) page-xfer: 	p 0x58e9a87ce000 - 0x58e9a87d0000
+(00.042929) page-xfer: 	buf 3/2
+(00.042934) page-xfer: 	p 0x58e9b5da9000 - 0x58e9b5daa000
+(00.042985) page-xfer: 	p 0x74082b83f000 - 0x74082b841000
+(00.043046) page-xfer: 	buf 6/1
+(00.043050) page-xfer: 	p 0x74082ba41000 - 0x74082ba47000
+(00.043328) page-xfer: 	buf 6/4
+(00.043333) page-xfer: 	p 0x74082ba47000 - 0x74082ba48000
+(00.043391) page-xfer: 	p 0x74082ba4b000 - 0x74082ba4e000
+(00.043559) page-xfer: 	p 0x74082ba53000 - 0x74082ba54000
+(00.043653) page-xfer: 	p 0x74082ba56000 - 0x74082ba57000
+(00.043717) page-xfer: 	buf 4/1
+(00.043721) page-xfer: 	p 0x74082ba8e000 - 0x74082ba92000
+(00.044138) page-xfer: 	buf 3/2
+(00.044144) page-xfer: 	p 0x7ffe4ebd5000 - 0x7ffe4ebd7000
+(00.044220) page-xfer: 	p 0x7ffe4ebd8000 - 0x7ffe4ebd9000
+(00.044269) page-xfer: 	buf 2/1
+(00.044273) page-xfer: 	p 0x7ffe4ebfb000 - 0x7ffe4ebfd000
+(00.044347) page-pipe: Killing page pipe
+(00.044383) ----------------------------------------
+(00.044412) Sent msg to daemon 65 0 0
+(00.044416) Wait for ack 65 on daemon socket
+pie: 1: __fetched msg: 65 0 0
+pie: 1: __sent ack msg: 65 65 0
+pie: 1: Daemon waits for command
+(00.044490) Fetched ack: 65 65 0
+(00.044521) Sent msg to daemon 67 0 0
+(00.044526) Wait for ack 67 on daemon socket
+pie: 1: __fetched msg: 67 0 0
+pie: 1: __sent ack msg: 67 67 0
+pie: 1: Daemon waits for command
+(00.044630) Fetched ack: 67 67 0
+(00.044668) Sent msg to daemon 68 0 0
+(00.044672) Wait for ack 68 on daemon socket
+pie: 1: __fetched msg: 68 0 0
+pie: 1: __sent ack msg: 68 68 0
+pie: 1: Daemon waits for command
+(00.044774) Fetched ack: 68 68 0
+(00.044802) Sent msg to daemon 69 0 0
+(00.044807) Wait for ack 69 on daemon socket
+pie: 1: __fetched msg: 69 0 0
+pie: 1: __sent ack msg: 69 69 0
+pie: 1: Daemon waits for command
+(00.044872) Fetched ack: 69 69 0
+(00.044878) 
+(00.044880) Dumping core (pid: 187621)
+(00.044882) ----------------------------------------
+(00.044883) Obtaining personality ... 
+(00.044929) Sent msg to daemon 64 0 0
+(00.044934) Wait for ack 64 on daemon socket
+pie: 1: __fetched msg: 64 0 0
+pie: 1: __sent ack msg: 64 64 0
+pie: 1: Daemon waits for command
+(00.045026) Fetched ack: 64 64 0
+(00.045036) 187621 has 0 sched policy
+(00.045038) 	dumping 0 nice for 187621
+(00.045041) dumping /proc/187621/loginuid
+(00.045053) dumping /proc/187621/oom_score_adj
+(00.045110) Sent msg to daemon 76 0 0
+(00.045115) Wait for ack 76 on daemon socket
+pie: 1: __fetched msg: 76 0 0
+pie: 1: __sent ack msg: 76 76 0
+pie: 1: Daemon waits for command
+(00.045207) Fetched ack: 76 76 0
+(00.045212) cg: Dumping cgroups for thread 187621
+(00.045248) cg:  `- New css ID 2
+(00.045252) cg:     `- [] -> [/kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod40c2dce9_a710_41f0_8022_fa44026a0ee5.slice/cri-containerd-b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd.scope] [193]
+(00.045369) cg: adding cgroup /proc/self/fd/19/kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod40c2dce9_a710_41f0_8022_fa44026a0ee5.slice/cri-containerd-b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd.scope
+(00.045400) cg: Dumping value  from /proc/self/fd/19/kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod40c2dce9_a710_41f0_8022_fa44026a0ee5.slice/cri-containerd-b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd.scope/cgroup.subtree_control
+(00.045422) cg: Dumping value max from /proc/self/fd/19/kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod40c2dce9_a710_41f0_8022_fa44026a0ee5.slice/cri-containerd-b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd.scope/cgroup.max.descendants
+(00.045444) cg: Dumping value max from /proc/self/fd/19/kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod40c2dce9_a710_41f0_8022_fa44026a0ee5.slice/cri-containerd-b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd.scope/cgroup.max.depth
+(00.045465) cg: Dumping value 0 from /proc/self/fd/19/kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod40c2dce9_a710_41f0_8022_fa44026a0ee5.slice/cri-containerd-b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd.scope/cgroup.freeze
+(00.045487) cg: Dumping value domain from /proc/self/fd/19/kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod40c2dce9_a710_41f0_8022_fa44026a0ee5.slice/cri-containerd-b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd.scope/cgroup.type
+(00.045779) cg: Set 2 is root one
+(00.045842) ----------------------------------------
+(00.045869) Waiting for 187621 to trap
+(00.045927) Daemon 187621 exited trapping
+(00.045939) Sent msg to daemon 3 0 0
+pie: 1: __fetched msg: 3 0 0
+pie: 1: 1: new_sp=0x74082b835fc8 ip 0x74082b93c3d2
+(00.046717) 187621 was trapped
+(00.046869) 187621 was trapped
+(00.046879) 187621 (native) is going to execute the syscall 15, required is 15
+(00.046970) 187621 was stopped
+(00.047177) 
+(00.047182) Dumping mm (pid: 187621)
+(00.047184) ----------------------------------------
+(00.047186) 0x58e9a87c7000-0x58e9a87c9000 (8K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0 reg fp  shmid: 0x1
+(00.047190) 0x58e9a87c9000-0x58e9a87cd000 (16K) prot 0x5 flags 0x2 fdflags 0 st 0x41 off 0x2000 reg fp  shmid: 0x1
+(00.047194) 0x58e9a87cd000-0x58e9a87ce000 (4K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x6000 reg fp  shmid: 0x1
+(00.047197) 0x58e9a87ce000-0x58e9a87cf000 (4K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x7000 reg fp  shmid: 0x1
+(00.047200) 0x58e9a87cf000-0x58e9a87d0000 (4K) prot 0x3 flags 0x2 fdflags 0 st 0x41 off 0x8000 reg fp  shmid: 0x1
+(00.047203) 0x58e9b5da9000-0x58e9b5dca000 (132K) prot 0x3 flags 0x22 fdflags 0 st 0x221 off 0 reg heap ap  shmid: 0
+(00.047206) 0x74082b83f000-0x74082b842000 (12K) prot 0x3 flags 0x22 fdflags 0 st 0x201 off 0 reg ap  shmid: 0
+(00.047210) 0x74082b842000-0x74082b86a000 (160K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0 reg fp  shmid: 0x2
+(00.047212) 0x74082b86a000-0x74082b9f2000 (1568K) prot 0x5 flags 0x2 fdflags 0 st 0x41 off 0x28000 reg fp  shmid: 0x2
+(00.047214) 0x74082b9f2000-0x74082ba41000 (316K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x1b0000 reg fp  shmid: 0x2
+(00.047216) 0x74082ba41000-0x74082ba45000 (16K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x1fe000 reg fp  shmid: 0x2
+(00.047217) 0x74082ba45000-0x74082ba47000 (8K) prot 0x3 flags 0x2 fdflags 0 st 0x41 off 0x202000 reg fp  shmid: 0x2
+(00.047219) 0x74082ba47000-0x74082ba54000 (52K) prot 0x3 flags 0x22 fdflags 0 st 0x201 off 0 reg ap  shmid: 0
+(00.047229) 0x74082ba56000-0x74082ba58000 (8K) prot 0x3 flags 0x22 fdflags 0 st 0x201 off 0 reg ap  shmid: 0
+(00.047231) 0x74082ba58000-0x74082ba59000 (4K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0 reg fp  shmid: 0x3
+(00.047232) 0x74082ba59000-0x74082ba84000 (172K) prot 0x5 flags 0x2 fdflags 0 st 0x41 off 0x1000 reg fp  shmid: 0x3
+(00.047234) 0x74082ba84000-0x74082ba8e000 (40K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x2c000 reg fp  shmid: 0x3
+(00.047236) 0x74082ba8e000-0x74082ba90000 (8K) prot 0x1 flags 0x2 fdflags 0 st 0x41 off 0x36000 reg fp  shmid: 0x3
+(00.047238) 0x74082ba90000-0x74082ba92000 (8K) prot 0x3 flags 0x2 fdflags 0 st 0x41 off 0x38000 reg fp  shmid: 0x3
+(00.047239) 0x7ffe4ebb8000-0x7ffe4ebd9000 (132K) prot 0x3 flags 0x122 fdflags 0 st 0x201 off 0 reg ap  shmid: 0
+(00.047241) 0x7ffe4ebf7000-0x7ffe4ebfb000 (16K) prot 0x1 flags 0x22 fdflags 0 st 0x1201 off 0 reg vvar ap  shmid: 0
+(00.047243) 0x7ffe4ebfb000-0x7ffe4ebfd000 (8K) prot 0x5 flags 0x22 fdflags 0 st 0x209 off 0 reg vdso ap  shmid: 0
+(00.047245) Obtaining task auvx ...
+(00.047398) Dumping path for -3 fd via self 19 [/]
+(00.047430) Dumping path for -3 fd via self 19 [/]
+(00.047436) Dumping task cwd id 0x7 root id 0x8
+(00.047520) mnt: Dumping mountpoints
+(00.047522) mnt: 	729: 7a:/ @ ./sys/firmware
+(00.062407) mnt: 	728: 79:/ @ ./proc/scsi
+(00.069607) mnt: 	727: 76:/null @ ./proc/timer_list
+(00.069628) mnt: 	726: 76:/null @ ./proc/latency_stats
+(00.069631) mnt: 	725: 76:/null @ ./proc/keys
+(00.069634) mnt: 	724: 76:/null @ ./proc/kcore
+(00.069636) mnt: 	723: 76:/null @ ./proc/interrupts
+(00.069638) mnt: 	722: 78:/ @ ./proc/acpi
+(00.076565) mnt: 	721: 75:/sysrq-trigger @ ./proc/sysrq-trigger
+(00.076639) mnt: 	720: 75:/sys @ ./proc/sys
+(00.076645) mnt: 	719: 75:/irq @ ./proc/irq
+(00.076650) mnt: 	718: 75:/fs @ ./proc/fs
+(00.076654) mnt: 	702: 75:/bus @ ./proc/bus
+(00.076664) mnt: 	816: 57:/ @ ./run/secrets/kubernetes.io/serviceaccount
+(00.076672) mnt: 	815: 58:/ @ ./dev/shm
+(00.076678) mnt: 	814: 800030:/var/lib/rancher/k3s/agent/containerd/io.containerd.grpc.v1.cri/sandboxes/e634ed94aab6e7066e0f4259622dc8d3833352ce0011d35132184f13199f197f/resolv.conf @ ./etc/resolv.conf
+(00.076686) mnt: 	813: 800030:/var/lib/rancher/k3s/agent/containerd/io.containerd.grpc.v1.cri/sandboxes/e634ed94aab6e7066e0f4259622dc8d3833352ce0011d35132184f13199f197f/hostname @ ./etc/hostname
+(00.076692) mnt: 	812: 800030:/var/lib/kubelet/pods/40c2dce9-a710-41f0-8022-fa44026a0ee5/containers/test-app/6b21f8a7 @ ./dev/termination-log
+(00.076696) mnt: 	811: 800030:/var/lib/kubelet/pods/40c2dce9-a710-41f0-8022-fa44026a0ee5/etc-hosts @ ./etc/hosts
+(00.076700) mnt: 	810: 17:/ @ ./sys/fs/cgroup
+(00.076704) mnt: 	809: 6f:/ @ ./sys
+(00.076707) mnt: 	808: 6a:/ @ ./dev/mqueue
+(00.076769) mnt: 	807: 77:/ @ ./dev/pts
+(00.076772) mnt: 	806: 76:/ @ ./dev
+(00.076776) mnt: Mount is not fully visible ./dev(806)
+(00.076826) mnt: 	mount has children ./dev(806)
+(00.085040) mnt: 	805: 75:/ @ ./proc
+(00.085057) mnt: 	803: 62:/ @ ./
+(00.085081) Dumping file-locks
+(00.085088) 
+(00.085090) Dumping pstree (pid: 187621)
+(00.085091) ----------------------------------------
+(00.085095) Process: 1(187621)
+(00.085133) ----------------------------------------
+(00.085143) Dumping 1(187621)'s namespaces
+(00.085788) Dump UTS namespace 12 via 187621
+(00.085960) Dump IPC namespace 11 via 187621
+(00.086465) IPC shared memory segments: 0
+(00.086492) Dump NET namespace info 10 via 187621
+(00.086589) IPC message queues: 0
+(00.086596) IPC semaphore sets: 0
+(00.086692) net: Dumping netns links
+(00.098611) net: Dumping netns links
+(00.110421) Namespaces dump complete
+(00.110551) cg: Dumping 1 sets
+(00.110561) cg:    `- Dumping  of /kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod40c2dce9_a710_41f0_8022_fa44026a0ee5.slice/cri-containerd-b5318bcbd3dbe4e63b4658c3f9be5b20b5f98bd2ac753a5565c1bf5dd549e4cd.scope
+(00.110574) cg: Writing CG image
+(00.110617) unix: Dumping external sockets
+(00.110622) Writing image inventory (version 1)
+(00.110876) Running post-dump scripts
+(00.110889) 	RPC
+(00.111202) net: Unlock network
+(00.111210) Running network-unlock scripts
+(00.111212) 	RPC
+(00.251085) Unfreezing tasks into 1
+(00.251127) 	Unseizing 187621 into 1
+(00.251215) Writing stats
+(00.251340) Dumping finished successfully

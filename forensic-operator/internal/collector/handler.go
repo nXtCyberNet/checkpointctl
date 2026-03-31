@@ -17,7 +17,7 @@ import (
 // TriggerRequest is what the controller sends to the collector
 type TriggerRequest struct {
 	CheckpointPath string `json:"checkpointPath"`
-	BundleKey      string `json:"bundleKey"` // e.g. production/payments-api/xxx
+	BundleKey      string `json:"bundleKey"`
 	SnapshotName   string `json:"snapshotName"`
 }
 
@@ -29,16 +29,13 @@ type CollectorResponse struct {
 
 // Handler is the HTTP handler for the checkpoint-collector DaemonSet
 type Handler struct {
-	storagePath string // usually /var/lib/forensics
-	authToken   string // simple pre-shared secret for PoC
+	storagePath string
+	authToken   string
 }
 
 // NewHandler creates the collector handler
 func NewHandler(storagePath, authToken string) *Handler {
-	return &Handler{
-		storagePath: storagePath,
-		authToken:   authToken,
-	}
+	return &Handler{storagePath: storagePath, authToken: authToken}
 }
 
 // HandleTrigger is the main endpoint: POST /trigger
@@ -51,7 +48,6 @@ func (h *Handler) HandleTrigger(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Simple auth check (pre-shared secret from Kubernetes Secret)
 	if r.Header.Get("Authorization") != "Bearer "+h.authToken {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -68,65 +64,75 @@ func (h *Handler) HandleTrigger(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 1. Build final bundle path first so temp staging can happen on the same filesystem.
-	bundlePath := filepath.Join(h.storagePath, req.BundleKey, "bundle.tar.gz")
-	if err := os.MkdirAll(filepath.Dir(bundlePath), 0755); err != nil {
+	// Destination directory derived from the bundle key
+	destDir := filepath.Join(h.storagePath, req.BundleKey)
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		logger.Error(err, "Failed to create destination directory", "path", destDir)
 		http.Error(w, "mkdir failed", http.StatusInternalServerError)
 		return
 	}
 
-	// Stage temp artifact in destination directory to avoid cross-device rename errors.
-	tempPath := filepath.Join(filepath.Dir(bundlePath), fmt.Sprintf(".%s.tmp", filepath.Base(req.CheckpointPath)))
+	// THE FIX: use the original checkpoint filename as the saved file name.
+	// The old code returned a "bundle.tar.gz" path that was NEVER written to
+	// disk, so the bundle builder always hit "no such file or directory" and
+	// wrote a .missing.txt placeholder instead of real CRIU data.
+	finalCheckpointPath := filepath.Join(destDir, filepath.Base(req.CheckpointPath))
 
-	// 2. Copy the checkpoint .tar to a safe temp location
+	// Stage in the same directory so os.Rename is always on-device (no cross-device error)
+	tempPath := filepath.Join(destDir, fmt.Sprintf(".%s.tmp", filepath.Base(req.CheckpointPath)))
+
 	if err := copyFile(req.CheckpointPath, tempPath); err != nil {
-		logger.Error(err, "Failed to copy checkpoint file")
+		logger.Error(err, "Failed to copy checkpoint file", "src", req.CheckpointPath)
 		http.Error(w, "copy failed", http.StatusInternalServerError)
 		return
 	}
 
-	// 3. Compute SHA256 before any transmission
 	sha256sum, err := computeSHA256(tempPath)
 	if err != nil {
+		_ = os.Remove(tempPath)
+		logger.Error(err, "Failed to compute SHA256")
 		http.Error(w, "hash failed", http.StatusInternalServerError)
 		return
 	}
 
-	// For PoC we just move the checkpoint tar into the bundle dir
-	// (In full version we would create the full .bundle.tar.gz here)
-	finalCheckpointPath := filepath.Join(filepath.Dir(bundlePath), filepath.Base(req.CheckpointPath))
 	if err := os.Rename(tempPath, finalCheckpointPath); err != nil {
-		// Fallback for environments where rename may still fail unexpectedly.
+		// Cross-device fallback (defensive; both paths are in destDir so this
+		// should never trigger, but guard it anyway)
 		if copyErr := copyFile(tempPath, finalCheckpointPath); copyErr != nil {
-			logger.Error(err, "Rename failed")
-			logger.Error(copyErr, "Fallback copy after rename failure also failed")
+			logger.Error(err, "Rename failed and fallback copy also failed",
+				"renameErr", err, "copyErr", copyErr)
+			_ = os.Remove(tempPath)
 			http.Error(w, "move failed", http.StatusInternalServerError)
 			return
 		}
 		_ = os.Remove(tempPath)
 	}
 
-	// 4. Cleanup original checkpoint file (critical for node disk safety)
+	// Best-effort cleanup of the original kubelet checkpoint file.
+	// Will fail when /var/lib/kubelet/checkpoints is mounted read-only — that
+	// is acceptable; log it and continue.
 	if err := os.Remove(req.CheckpointPath); err != nil {
 		logger.Error(err, "Failed to remove original checkpoint file", "path", req.CheckpointPath)
 	}
 
 	logger.Info("Collector successfully processed checkpoint",
 		"originalPath", req.CheckpointPath,
-		"bundlePath", bundlePath,
+		"bundlePath", finalCheckpointPath,
 		"sha256", sha256sum,
 		"durationMs", time.Since(start).Milliseconds())
 
+	// Return the ACTUAL path on disk so the bundle builder can read the file.
 	resp := CollectorResponse{
-		BundlePath: bundlePath,
+		BundlePath: finalCheckpointPath,
 		SHA256:     sha256sum,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logger.Error(err, "Failed to encode response")
+	}
 }
 
-// Simple file copy helper
 func copyFile(src, dst string) error {
 	in, err := os.Open(src)
 	if err != nil {

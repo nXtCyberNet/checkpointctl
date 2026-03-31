@@ -1,6 +1,6 @@
 # forensic-operator Troubleshooting and Progress Log
 
-Last updated: 2026-03-30
+Last updated: 2026-03-31
 
 This file now captures all major issues seen so far, the fix or workaround used, and the current state.
 
@@ -212,24 +212,60 @@ This file now captures all major issues seen so far, the fix or workaround used,
   - Added retry loops for dependency download in Dockerfiles.
 - Status: Mitigation applied.
 
+## 24) False Sealed state with tiny bundles (metadata-only)
+- Symptom:
+  - Snapshot reached `Sealed` but produced very small bundles (about 1.3KB to 1.6KB).
+  - Checksum sometimes mismatched between status and downloaded file due to duplicate capture race.
+- Root cause:
+  - Bundle assembler previously tolerated missing checkpoint payloads and still produced archive output.
+  - Concurrent reconcile path could re-run capture for same snapshot under conflict timing.
+- Fix:
+  - Added capture-phase lock (`Prefetching -> Capturing`) so only one reconcile executes capture.
+  - Added strict bundle completeness behavior: fail assembly when checkpoint payload is unreadable.
+- Status: Fixed.
+
+## 25) Controller and collector path visibility mismatch
+- Symptom:
+  - Failure reason: checkpoint payload unavailable at `/var/lib/forensics/.../bundle.tar.gz`.
+  - Collector reported success, but controller could not open returned path.
+- Root cause:
+  - Old collector image was still running and returning stale `bundle.tar.gz` path format.
+  - Controller required shared storage mount to read collector output files.
+- Fix:
+  - Rebuilt and redeployed collector image; verified running pod image IDs updated.
+  - Mounted `/var/lib/forensics` hostPath into controller deployment.
+  - Re-ran full reset/redeploy/debug flow.
+- Status: Fixed.
+
+## 26) End-to-end validated success baseline (2026-03-31)
+- Evidence from debug run:
+  - Namespace reset, fresh controller/collector builds, clean redeploy completed.
+  - New snapshot `test-app-20260331051612` reached `Sealed`.
+  - Bundle size increased to about 32KB (not metadata-only tiny output).
+  - Remote SHA and local downloaded SHA matched exactly:
+    - `02070d5c38391a8486e2c6f0aff36c7d65ba05caba525c351b981cd78356c08f`
+  - Artifacts recorded under `debug-run-20260331-051308`.
+- Status: Confirmed working baseline.
+
 ## Progress so far
-- Code-level compile and wiring issues: Mostly resolved.
+- Code-level compile and wiring issues: Resolved.
 - CRD/RBAC/controller startup: Resolved and stable.
-- Pod watcher trigger path: Working.
+- Pod watcher trigger path: Working with current annotation domain.
 - Capture prefetch/metadata flow: Working.
 - Collector reachability and auth wiring: Fixed in manifests/code.
-- Collector robustness for bundle finalization: Improved in code.
-- Build/deploy pipeline: Improved, but still the most sensitive part due to environment differences and network.
+- Bundle assembly correctness: Fixed (strict payload checks + shared path visibility).
+- Build/deploy pipeline: Working with reset/redeploy automation and digest verification.
 
 ## Current state (what is done vs what is pending)
 - Done:
   - Core controller and collector logic corrections.
   - CRD, RBAC, service and deployment wiring fixes.
   - Main runtime and integration error handling improvements.
-- Pending confirmation:
-  - Rebuild and redeploy both images with latest Dockerfile changes.
-  - Run a clean end-to-end snapshot and verify collector no longer returns 500.
-  - Confirm final snapshot phase reaches success in target k3s environment.
+  - Verified end-to-end `Sealed` snapshot with matching local/remote SHA and non-trivial bundle size.
+- Pending hardening:
+  - Repeatability test (multiple consecutive runs) to detect intermittent runtime locks.
+  - Optional policy choice: keep strict fail-on-missing-payload behavior or add bounded retry tuning.
+  - Optional CI smoke test using reset/redeploy script and SHA check gate.
 
 ## Notes and recommendations
 - Keep this file as the single incident ledger for reproducibility.
@@ -237,4 +273,5 @@ This file now captures all major issues seen so far, the fix or workaround used,
   - exact image tags used,
   - deployment timestamp,
   - one-line outcome (Success or Failed + reason).
-- If failures continue, treat build/publish/deploy chain as first suspect before debugging business logic again.
+- If failures reappear with tiny bundles, first verify running pod image IDs match freshly built image digests.
+- Keep using full reset/redeploy diagnostics for authoritative validation on k3s/containerd.

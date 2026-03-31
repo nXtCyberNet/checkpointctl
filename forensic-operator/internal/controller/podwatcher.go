@@ -41,33 +41,20 @@ func (w *PodWatcher) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	// Support both legacy and current annotation domains.
-	const captureAnnotationNew = "forensics.cybernet.dev/capture"
-	const containersAnnotationNew = "forensics.cybernet.dev/containers"
-	const captureAnnotationLegacy = "forensics.checkpointctl.io/capture"
-	const containersAnnotationLegacy = "forensics.checkpointctl.io/containers"
+	const captureAnnotation = "forensics.cybernet.dev/capture"
+	const containersAnnotation = "forensics.cybernet.dev/containers"
 
 	if pod.Annotations == nil {
 		return ctrl.Result{}, nil
 	}
 
-	captureKey := ""
-	containersKey := ""
-	if _, ok := pod.Annotations[captureAnnotationNew]; ok {
-		captureKey = captureAnnotationNew
-		containersKey = containersAnnotationNew
-	} else if _, ok := pod.Annotations[captureAnnotationLegacy]; ok {
-		captureKey = captureAnnotationLegacy
-		containersKey = containersAnnotationLegacy
-	}
-
-	if captureKey == "" {
+	if _, ok := pod.Annotations[captureAnnotation]; !ok {
 		return ctrl.Result{}, nil
 	}
 
 	// Extract requested containers (comma-separated)
 	var requestedContainers []string
-	if containersStr, ok := pod.Annotations[containersKey]; ok && containersStr != "" {
+	if containersStr, ok := pod.Annotations[containersAnnotation]; ok && containersStr != "" {
 		for _, c := range strings.Split(containersStr, ",") {
 			c = strings.TrimSpace(c)
 			if c != "" {
@@ -115,10 +102,8 @@ func (w *PodWatcher) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if freshPod.Annotations == nil {
 			freshPod.Annotations = make(map[string]string)
 		}
-		delete(freshPod.Annotations, captureAnnotationNew)
-		delete(freshPod.Annotations, containersAnnotationNew)
-		delete(freshPod.Annotations, captureAnnotationLegacy)
-		delete(freshPod.Annotations, containersAnnotationLegacy)
+		delete(freshPod.Annotations, captureAnnotation)
+		delete(freshPod.Annotations, containersAnnotation)
 		return w.Update(ctx, &freshPod)
 	}); err != nil {
 		logger.Error(err, "Failed to remove annotation")

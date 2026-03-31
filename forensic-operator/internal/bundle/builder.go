@@ -150,17 +150,15 @@ func (b *Builder) createManifest(files map[string]string, metadataBytes, snapsho
 	manifest := make(map[string]string)
 
 	for bundlePath, realPath := range files {
-		if _, err := os.Stat(realPath); err == nil {
-			sha, err := computeSHA256(realPath)
-			if err != nil {
-				return nil, err
-			}
-			manifest[bundlePath] = sha
-			continue
+		if err := waitForReadableFile(realPath, 3, 500*time.Millisecond); err != nil {
+			return nil, fmt.Errorf("checkpoint payload unavailable for %s at %s: %w", bundlePath, realPath, err)
 		}
 
-		// Keep track of inaccessible file paths so investigations still have evidence.
-		manifest[bundlePath] = "UNAVAILABLE"
+		sha, err := computeSHA256(realPath)
+		if err != nil {
+			return nil, err
+		}
+		manifest[bundlePath] = sha
 	}
 
 	manifest["metadata.json"] = hashBytes(metadataBytes)
@@ -192,10 +190,7 @@ func (b *Builder) assembleBundle(bundlePath string, files map[string]string, man
 	for _, archivePath := range archivePaths {
 		realPath := files[archivePath]
 		if err := addFileToTar(tw, archivePath, realPath); err != nil {
-			// Keep bundle creation resilient even if one source path is missing.
-			if err := addBytesToTar(tw, archivePath+".missing.txt", []byte(err.Error())); err != nil {
-				return err
-			}
+			return fmt.Errorf("failed adding checkpoint payload %s from %s: %w", archivePath, realPath, err)
 		}
 	}
 
@@ -270,6 +265,22 @@ func addBytesToTar(tw *tar.Writer, archivePath string, data []byte) error {
 func hashBytes(data []byte) string {
 	h := sha256.Sum256(data)
 	return hex.EncodeToString(h[:])
+}
+
+func waitForReadableFile(path string, attempts int, delay time.Duration) error {
+	var lastErr error
+	for i := 0; i < attempts; i++ {
+		f, err := os.Open(path)
+		if err == nil {
+			_ = f.Close()
+			return nil
+		}
+		lastErr = err
+		if i < attempts-1 {
+			time.Sleep(delay)
+		}
+	}
+	return lastErr
 }
 
 // computeSHA256 is a small helper used everywhere
